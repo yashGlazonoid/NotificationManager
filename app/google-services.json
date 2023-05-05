@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "213831139367",
+    "project_id": "notificationmana-746b8",
+    "storage_bucket": "notificationmana-746b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213831139367:android:230826171c75493c638e02",
+        "android_client_info": {
+          "package_name": "com.example.notificationmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "213831139367-t63ehrkvltl9b8ftecnmql7hevbcd49a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.notificationmanager",
+            "certificate_hash": "9818e06d058d8627e9ec3da113fddfb8a9f7509c"
+          }
+        },
+        {
+          "client_id": "213831139367-m09d6jvg6116mkkqnve60ai7ukfjdgbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXckg4Jd8obiG9yhluyyvzC77j2aascAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "213831139367-m09d6jvg6116mkkqnve60ai7ukfjdgbv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

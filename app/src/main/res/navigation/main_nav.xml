@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.notificationmanager.fragments.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/acceptedFragment"
+        android:name="com.example.notificationmanager.fragments.AcceptedFragment"
+        android:label="fragment_accepted"
+        tools:layout="@layout/fragment_accepted" >
+        <action
+            android:id="@+id/action_acceptedFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/rejectedFragment"
+        android:name="com.example.notificationmanager.fragments.RejectedFragment"
+        android:label="fragment_rejected"
+        tools:layout="@layout/fragment_rejected" />
+</navigation>

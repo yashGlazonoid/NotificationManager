@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:title="Home"
+        android:id="@id/homeFragment"
+        android:icon="@drawable/ic_home"/>
+    <item
+        android:title="Approved"
+        android:id="@id/acceptedFragment"
+        android:icon="@drawable/ic_approved"/>
+    <item
+        android:title="Rejected"
+        android:id="@id/rejectedFragment"
+        android:icon="@drawable/ic_rejected"/>
+
+</menu>
