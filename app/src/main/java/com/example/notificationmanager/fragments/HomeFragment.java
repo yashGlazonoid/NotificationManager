@@ -1,5 +1,6 @@
 package com.example.notificationmanager.fragments;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,8 +30,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -121,6 +128,19 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        binding.joinDateFromBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setDate("join");
+            }
+        });
+        binding.joinDateToBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setDate("to");
+            }
+        });
+
 
         genderList.clear();
 
@@ -184,6 +204,50 @@ public class HomeFragment extends Fragment {
 
         return binding.getRoot();
     }
+
+    private void setDate(String dateType) {
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar selectedDate = Calendar.getInstance();
+                selectedDate.set(year, monthOfYear, dayOfMonth);
+
+                if (selectedDate.after(calendar)) { // Check if selected date is after current date
+                    Toast.makeText(requireContext(), "Selected date cannot be greater than current date", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Set selected date in TextView
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String selectedDateString = sdf.format(selectedDate.getTime());
+
+                if (dateType.equals("join")){
+                    binding.joinDateFromBt.setText(selectedDateString);
+                }
+                else{
+                    String fromDate = binding.joinDateFromBt.getText().toString();
+                    try {
+                        Date from = sdf.parse(fromDate);
+                        Date to = sdf.parse(selectedDateString);
+                        if (to.before(from)) {
+                            Toast.makeText(requireContext(), "Selected date cannot be less than from date", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    binding.joinDateToBt.setText(selectedDateString);
+                }
+            }
+        };
+
+        // Show DatePickerDialog
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.show();
+    }
+
+
 
     private void getDataFromDocument(String documentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
