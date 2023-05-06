@@ -78,13 +78,29 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     @Override
                     public void onSuccess(List<Object> objects) {
                         JSONArray array = new JSONArray();
+                        ArrayList<String> tokenList = new ArrayList<>();
                         for (Object object : objects) {
                             QuerySnapshot querySnapshot = (QuerySnapshot) object;
                             for (QueryDocumentSnapshot document : querySnapshot) {
                                 User user = document.toObject(User.class);
-                                array.put(user.getFCMToken());
+
+                                if (tokenList.contains(user.getFCMToken())){
+                                    Log.d("fcm","Already in");
+                                }
+                                else{
+                                    tokenList.add(user.getFCMToken());
+                                }
+//                                array.put(user.getFCMToken());
                             }
                         }
+                        for (String token : tokenList) {
+                            array.put(token);
+                        }
+
+                        System.out.println(array);
+//                        Gson gson = new Gson();
+//                        array = gson.toJsonTree(tokenList).getAsJsonArray();
+//                        System.out.println(array);
                         Log.d("fcm", String.valueOf(array));
                         FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "please check");
                     }
