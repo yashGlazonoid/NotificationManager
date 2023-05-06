@@ -56,6 +56,7 @@ public class HomeFragment extends Fragment {
 
     private String documentId;
     private Map<String,Boolean> query = new HashMap<>();
+    private int checkDatePicker = 0;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -134,12 +135,20 @@ public class HomeFragment extends Fragment {
                 setDate("join");
             }
         });
+
         binding.joinDateToBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setDate("to");
+                if (checkDatePicker==1){
+                    setDate("to");
+                }
+                else {
+                    Toast.makeText(requireContext(), "Choose start date first", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+
+
 
 
         genderList.clear();
@@ -218,12 +227,12 @@ public class HomeFragment extends Fragment {
                     return;
                 }
 
-                // Set selected date in TextView
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 String selectedDateString = sdf.format(selectedDate.getTime());
 
                 if (dateType.equals("join")){
                     binding.joinDateFromBt.setText(selectedDateString);
+                    checkDatePicker =1;
                 }
                 else{
                     String fromDate = binding.joinDateFromBt.getText().toString();
@@ -241,8 +250,6 @@ public class HomeFragment extends Fragment {
                 }
             }
         };
-
-        // Show DatePickerDialog
         DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
         datePickerDialog.show();
     }

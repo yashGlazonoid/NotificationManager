@@ -238,7 +238,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:hint="Enter Age"
-                            android:inputType="text"
+                            android:inputType="number"
                             android:maxLength="2"
                             />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -286,6 +286,7 @@
                         android:layout_height="48dp"
                         android:text="Select Date Start From"
                         android:layout_marginHorizontal="20dp"
+                        android:textAllCaps="false"
                         />
                     <Button
                         android:id="@+id/joinDateToBt"
@@ -296,6 +297,8 @@
                         android:layout_below="@id/joinDateFromBt"
                         android:layout_marginTop="20dp"
                         android:layout_marginBottom="20dp"
+                        android:textAllCaps="false"
+
                         />
 
                 </RelativeLayout>
