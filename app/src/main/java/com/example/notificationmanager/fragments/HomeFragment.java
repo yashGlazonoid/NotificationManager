@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.notificationmanager.FCMSend;
 import com.example.notificationmanager.adapter.ChoiceAdapter;
 import com.example.notificationmanager.databinding.FragmentHomeBinding;
 import com.example.notificationmanager.model.User;
@@ -77,7 +78,9 @@ public class HomeFragment extends Fragment {
                         Log.d("DepartmentList",finalDepartmentList.toString());
                         Log.d("DepartmentList",finalGenderList.toString());
                         Log.d("DepartmentList",finalLocationList.toString());
-                        sendNotificationToUserNew("fxGLZKOwSFa18eFIXY3_kv:APA91bG6f8TT50ktc17_zpVcnGulGhqBza8ZCUWzOn-IaIu8zW3A54jaae03Yuf-LaOrGvi8t-7N72J9koU0qALoS-filIDgvi91If9ZBigtP8hnC5DC32DxoozVLvzrpHVjzbo5U553");
+                        FCMSend.pushNotification(requireContext(),
+                                "cEzbCvUXQgeAqhJTg03Iwj:APA91bE4HZlGsmf95P7Kthvm6t3zlPwzqbIPk0jKGAN2Gm65dI5meM2tNRoQ9IunrjwsxoSaJGBIewGiETLDEu7bA8qMUJ4QCDn2VXZBeFdbP02u-A6DOhZxOipTIvL0XeL8-OFyHvxv",
+                                "Notification created successfully with title "+binding.tittleEt.getText().toString().trim(),"Please wait for the approval","initial");
                         setDataForAcceptance();
                         getUserFilter();
                     }
