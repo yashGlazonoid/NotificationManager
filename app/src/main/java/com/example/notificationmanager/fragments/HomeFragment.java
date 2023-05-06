@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.notificationmanager.FCMSend;
 import com.example.notificationmanager.adapter.ChoiceAdapter;
 import com.example.notificationmanager.databinding.FragmentHomeBinding;
 import com.example.notificationmanager.model.User;
@@ -49,6 +48,7 @@ public class HomeFragment extends Fragment {
     private ChoiceAdapter genderAdapter;
 
     private String documentId;
+    private Map<String,Boolean> query = new HashMap<>();
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -71,22 +71,44 @@ public class HomeFragment extends Fragment {
             binding.addBt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!finalLocationList.isEmpty()&&!finalGenderList.isEmpty()&&!finalDepartmentList.isEmpty()
-                            && !binding.tittleEt.getText().toString().trim().isEmpty()
-                            && !binding.desceEt.getText().toString().trim().isEmpty()
-                    ){
-                        Log.d("DepartmentList",finalDepartmentList.toString());
-                        Log.d("DepartmentList",finalGenderList.toString());
-                        Log.d("DepartmentList",finalLocationList.toString());
-                        FCMSend.pushNotification(requireContext(),
-                                "cEzbCvUXQgeAqhJTg03Iwj:APA91bE4HZlGsmf95P7Kthvm6t3zlPwzqbIPk0jKGAN2Gm65dI5meM2tNRoQ9IunrjwsxoSaJGBIewGiETLDEu7bA8qMUJ4QCDn2VXZBeFdbP02u-A6DOhZxOipTIvL0XeL8-OFyHvxv",
-                                "Notification created successfully with title "+binding.tittleEt.getText().toString().trim(),"Please wait for the approval","initial");
-                        setDataForAcceptance();
-                        getUserFilter();
+                    if (!finalLocationList.isEmpty()){
+                        query.put("Location",true);
                     }
                     else{
-                        Toast.makeText(requireContext(), "Every field needs to be filled", Toast.LENGTH_SHORT).show();
+                        query.put("Location",false);
                     }
+                    if (!finalGenderList.isEmpty()){
+                        query.put("Gender",true);
+                    }
+                    else{
+                        query.put("Gender",false);
+                    }
+                    if (!finalDepartmentList.isEmpty()){
+                        query.put("Department",true);
+                    }
+                    else{
+                        query.put("Department",false);
+                    }
+
+                    if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
+                        setDataForAcceptance(query);
+                    }
+//                    if (!finalLocationList.isEmpty()&&!finalGenderList.isEmpty()&&!finalDepartmentList.isEmpty()
+//                            && !binding.tittleEt.getText().toString().trim().isEmpty()
+//                            && !binding.desceEt.getText().toString().trim().isEmpty()
+//                    ){
+//                        Log.d("DepartmentList",finalDepartmentList.toString());
+//                        Log.d("DepartmentList",finalGenderList.toString());
+//                        Log.d("DepartmentList",finalLocationList.toString());
+//                        FCMSend.pushNotification(requireContext(),
+//                                "cEzbCvUXQgeAqhJTg03Iwj:APA91bE4HZlGsmf95P7Kthvm6t3zlPwzqbIPk0jKGAN2Gm65dI5meM2tNRoQ9IunrjwsxoSaJGBIewGiETLDEu7bA8qMUJ4QCDn2VXZBeFdbP02u-A6DOhZxOipTIvL0XeL8-OFyHvxv",
+//                                "Notification created successfully with title "+binding.tittleEt.getText().toString().trim(),"Please wait for the approval","initial");
+//                        setDataForAcceptance();
+//                        getUserFilter();
+//                    }
+//                    else{
+//                        Toast.makeText(requireContext(), "Every field needs to be filled", Toast.LENGTH_SHORT).show();
+//                    }
                 }
             });
         }
@@ -276,7 +298,9 @@ public class HomeFragment extends Fragment {
                                 Log.d("Location",locationList.toString());
                                 ChoiceAdapter choiceAdapter = new ChoiceAdapter(locationList,finalLocationList,"Location");
                                 binding.locationRv.setAdapter(choiceAdapter);
-                                binding.locationRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+                                if (isAdded()){
+                                    binding.locationRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+                                }
                             }
                         }
                     }
@@ -334,7 +358,7 @@ public class HomeFragment extends Fragment {
 
     }
 
-    void setDataForAcceptance(){
+    void setDataForAcceptance(Map<String, Boolean> query){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
         DocumentReference newNotificationRef = notificationsRef.document();
@@ -346,13 +370,20 @@ public class HomeFragment extends Fragment {
         String description = binding.desceEt.getText().toString().trim();
 
         Map<String, Object> data = new HashMap<>();
-        data.put("departments", finalDepartmentList);
-        data.put("genders", finalGenderList);
-        data.put("locations", finalLocationList);
+        if (!finalDepartmentList.isEmpty()){
+            data.put("departments", finalDepartmentList);
+        }
+        if (!finalGenderList.isEmpty()){
+            data.put("genders", finalGenderList);
+        }
+        if (!finalLocationList.isEmpty()){
+            data.put("locations", finalLocationList);
+        }
         data.put("title", title);
         data.put("description", description);
-        data.put("isApproved", false);
+        data.put("isApproved", "No");
         data.put("documentId",documentId);
+        data.put("query",query);
 
         newNotificationRef.set(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {

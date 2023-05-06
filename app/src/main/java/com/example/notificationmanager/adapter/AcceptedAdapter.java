@@ -1,6 +1,5 @@
 package com.example.notificationmanager.adapter;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,61 +7,37 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationmanager.R;
 import com.example.notificationmanager.model.NotificationModel;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-import java.util.ArrayList;
+public class AcceptedAdapter extends FirestoreRecyclerAdapter<NotificationModel, AcceptedAdapter.AcceptedViewHolder> {
 
-public class AcceptedAdapter extends RecyclerView.Adapter<AcceptedAdapter.AcceptedViewHolder> {
+    public AcceptedAdapter(@NonNull FirestoreRecyclerOptions<NotificationModel> options) {
+        super(options);
+    }
 
-    private ArrayList<NotificationModel> mlist;
+    @Override
+    protected void onBindViewHolder(@NonNull AcceptedViewHolder holder, int position, @NonNull NotificationModel model) {
+        holder.notificationTitle.setText(model.getTitle());
+        holder.notificationDesc.setText(model.getDescription());
 
-    public AcceptedAdapter(ArrayList<NotificationModel> list){
-        this.mlist = list;
+
+        if (model.isApproved()){
+            holder.status.setImageResource(R.drawable.ic_green);
+        }
+        else{
+            holder.status.setImageResource(R.drawable.ic_red);
+        }
     }
 
     @NonNull
     @Override
     public AcceptedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.approved_item,parent
-                ,false);
-        return new AcceptedViewHolder(view);
-    }
-
-    public void onBindViewHolder(@NonNull AcceptedViewHolder holder, int position) {
-        NotificationModel current = mlist.get(position);
-
-        holder.notificationTitle.setText(current.getTitle());
-        holder.notificationDesc.setText(current.getDescription());
-
-        if (current.isApproved()) {
-            holder.status.setImageResource(R.drawable.ic_green);
-        } else {
-            holder.status.setImageResource(R.drawable.ic_red);
-        }
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (current.isApproved()) {
-                    // Do something if the notification is approved
-                } else {
-                    // If the notification is not approved, navigate to the home fragment and pass the document ID as an argument
-                    Bundle bundle = new Bundle();
-                    bundle.putString("documentId", current.getDocumentId());
-                    Navigation.findNavController(v).navigate(R.id.action_acceptedFragment_to_homeFragment, bundle);
-                }
-            }
-        });
-    }
-
-
-    @Override
-    public int getItemCount() {
-        return mlist.size();
+        return new AcceptedViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.approved_item,parent,false));
     }
 
     class AcceptedViewHolder extends RecyclerView.ViewHolder{

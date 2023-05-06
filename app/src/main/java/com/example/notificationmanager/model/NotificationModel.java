@@ -1,26 +1,51 @@
 package com.example.notificationmanager.model;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class NotificationModel {
+    String id;
     private String documentId;
     private String title;
     private String description;
-    private ArrayList<String> department;
-    private ArrayList<String> gender;
-    private ArrayList<String> location;
+    private ArrayList<String> departments = new ArrayList<>();
+    private ArrayList<String> genders = new ArrayList<>();
+    private ArrayList<String> locations = new ArrayList<>();
     private boolean isApproved;
+    private Map<String, Boolean> query;
 
-    public NotificationModel() {}
+    public ArrayList<String> getDepartments() {
+        return departments;
+    }
 
-    public NotificationModel(String documentId, String title, String description, ArrayList<String> department, ArrayList<String> gender, ArrayList<String> location, boolean isApproved) {
+    public ArrayList<String> getGenders() {
+        return genders;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public ArrayList<String> getLocations() {
+        return locations;
+    }
+
+    public NotificationModel() {
+    }
+
+    public NotificationModel(String documentId, String title, String description, ArrayList<String> department, ArrayList<String> gender, ArrayList<String> location, boolean isApproved, Map<String, Boolean> query) {
         this.documentId = documentId;
         this.title = title;
         this.description = description;
-        this.department = department;
-        this.gender = gender;
-        this.location = location;
+        this.departments = department;
+        this.genders = gender;
+        this.locations = location;
         this.isApproved = isApproved;
+        this.query = query;
     }
 
     public String getDocumentId() {
@@ -47,28 +72,16 @@ public class NotificationModel {
         this.description = description;
     }
 
-    public ArrayList<String> getDepartment() {
-        return department;
-    }
-
     public void setDepartment(ArrayList<String> department) {
-        this.department = department;
-    }
-
-    public ArrayList<String> getGender() {
-        return gender;
+        this.departments = department;
     }
 
     public void setGender(ArrayList<String> gender) {
-        this.gender = gender;
-    }
-
-    public ArrayList<String> getLocation() {
-        return location;
+        this.genders = gender;
     }
 
     public void setLocation(ArrayList<String> location) {
-        this.location = location;
+        this.locations = location;
     }
 
     public boolean isApproved() {
@@ -77,5 +90,13 @@ public class NotificationModel {
 
     public void setApproved(boolean approved) {
         isApproved = approved;
+    }
+
+    public Map<String, Boolean> getQuery() {
+        return query;
+    }
+
+    public void setQuery(Map<String, Boolean> query) {
+        this.query = query;
     }
 }
