@@ -3,7 +3,7 @@ package com.example.notificationmanager.model;
 import java.util.ArrayList;
 
 public class User {
-    String age = "";
+    String Age ;
     ArrayList<String> DepartmentTypes;
     String FCMToken = "";
     String Gender = "";
@@ -13,11 +13,11 @@ public class User {
     }
 
     public String getAge() {
-        return age;
+        return Age;
     }
 
     public void setAge(String age) {
-        this.age = age;
+        this.Age = age;
     }
 
     public ArrayList<String> getDepartmentTypes() {
@@ -53,7 +53,7 @@ public class User {
     }
 
     public User(String age, ArrayList<String> departmentTypes, String FCMToken, String gender, String workLocation) {
-        this.age = age;
+        this.Age = age;
         DepartmentTypes = departmentTypes;
         this.FCMToken = FCMToken;
         Gender = gender;
