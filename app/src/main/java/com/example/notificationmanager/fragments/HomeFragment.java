@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,6 +59,10 @@ public class HomeFragment extends Fragment {
     private String documentId;
     private Map<String,Boolean> query = new HashMap<>();
     private int checkDatePicker = 0;
+
+    private String ageEt;
+    private int checkForSpinner =0 ;
+    private String ageShouldBe;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -99,7 +105,7 @@ public class HomeFragment extends Fragment {
                     }
 
                     if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
-                        setDataForAcceptance(query);
+                        setDataForAcceptance(query,checkForSpinner);
                     }
 //                    if (!finalLocationList.isEmpty()&&!finalGenderList.isEmpty()&&!finalDepartmentList.isEmpty()
 //                            && !binding.tittleEt.getText().toString().trim().isEmpty()
@@ -120,6 +126,15 @@ public class HomeFragment extends Fragment {
                 }
             });
         }
+
+        binding.ageRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton radioButton = requireView().findViewById(checkedId);
+                ageShouldBe = radioButton.getText().toString().trim();
+                Log.d("ageShouldBe",ageShouldBe);
+            }
+        });
 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
@@ -159,7 +174,6 @@ public class HomeFragment extends Fragment {
 
         genderList.add("Male");
         genderList.add("Female");
-        genderList.add("All");
 
         ArrayAdapter ad = new ArrayAdapter(requireContext(),
                 android.R.layout.simple_spinner_item,
@@ -175,10 +189,14 @@ public class HomeFragment extends Fragment {
 //                    Toast.makeText(requireContext(), "First", Toast.LENGTH_SHORT).show();
                     binding.ageCardView.setVisibility(View.GONE);
                     binding.dateCardView.setVisibility(View.VISIBLE);
+                    checkForSpinner = 1;
                 }else if (position==0){
 //                    Toast.makeText(requireContext(), "Zero", Toast.LENGTH_SHORT).show();
                     binding.ageCardView.setVisibility(View.VISIBLE);
                     binding.dateCardView.setVisibility(View.GONE);
+                    ageEt = binding.ageEt.getText().toString().trim();
+                    checkForSpinner = 0;
+
                 }
             }
 
@@ -429,10 +447,11 @@ public class HomeFragment extends Fragment {
 
     }
 
-    void setDataForAcceptance(Map<String, Boolean> query){
+    void setDataForAcceptance(Map<String, Boolean> query,int checkForSpinner){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
         DocumentReference newNotificationRef = notificationsRef.document();
+
 
         String documentId = newNotificationRef.getId();
         Log.d("DocumentId", documentId);
@@ -450,6 +469,18 @@ public class HomeFragment extends Fragment {
         if (!finalLocationList.isEmpty()){
             data.put("locations", finalLocationList);
         }
+        if (checkForSpinner == 0){
+            data.put("age",binding.ageEt.getText().toString().trim());
+            data.put("ageShouldBe",ageShouldBe);
+            query.put("age",true);
+
+        }
+        else{
+            data.put("dateStartFrom",binding.joinDateFromBt.getText().toString().trim());
+            data.put("dateTo",binding.joinDateToBt.getText().toString().trim());
+            query.put("date",true);
+        }
+        Log.d("CheckForSpinner",String.valueOf(checkForSpinner));
         data.put("title", title);
         data.put("description", description);
         data.put("isApproved", "No");
