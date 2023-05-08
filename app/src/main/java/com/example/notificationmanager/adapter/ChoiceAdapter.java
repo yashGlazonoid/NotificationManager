@@ -21,12 +21,19 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
     private ArrayList<String> mList;
     private ArrayList<String> mChoice;
 
+    private int checkBox = 0;
+
+
     public ChoiceAdapter(ArrayList<String> depList, ArrayList<String> choice,String c){
         this.mList = depList;
         this.mChoice = choice;
     }
 
 
+    public void uncheckAll() {
+        checkBox = 1;
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override
@@ -39,15 +46,14 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
         String current = mList.get(position);
         holder.choiceTitle.setText(current);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                holder.addBt.setChecked(!holder.addBt.isChecked());
-            }
-        });
+        if (checkBox == 1){
+            holder.addBt.setChecked(false);
+        }
+
         holder.addBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
                 if (isChecked){
                     if (mChoice.contains(current)){
                         mChoice.remove(current);
@@ -60,6 +66,7 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
                 if (!isChecked){
                     mChoice.remove(current);
                 }
+
             }
         });
     }

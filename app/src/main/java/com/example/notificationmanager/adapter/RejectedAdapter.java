@@ -3,7 +3,9 @@ package com.example.notificationmanager.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.transition.AutoTransition;
+import android.transition.ChangeBounds;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -114,21 +115,47 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "This is qorking" + model.getQuery().get("age"), Toast.LENGTH_SHORT).show();
-                if (Boolean.TRUE.equals(model.getQuery().get("age"))){
-                    Toast.makeText(v.getContext(), "This is working true"+ model.getDocumentId(), Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(v.getContext(), "This is working false", Toast.LENGTH_SHORT).show();
+                TransitionSet transitionSet = new TransitionSet();
+                transitionSet.addTransition(new AutoTransition());
+                transitionSet.addTransition(new ChangeBounds());
 
-                }
-                if (holder.secondaryCardView.getVisibility() == View.VISIBLE){
-                    TransitionManager.beginDelayedTransition(holder.mainCardView, new AutoTransition());
+                if (holder.secondaryCardView.getVisibility() == View.VISIBLE) {
+                    TransitionManager.beginDelayedTransition(holder.mainCardView, transitionSet);
                     holder.secondaryCardView.setVisibility(View.GONE);
-                }else {
-                    TransitionManager.beginDelayedTransition(holder.mainCardView, new AutoTransition());
+                } else {
+                    TransitionManager.beginDelayedTransition(holder.mainCardView, transitionSet);
                     holder.secondaryCardView.setVisibility(View.VISIBLE);
                 }
+
+            }
+        });
+
+        holder.rejectBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection("notifications").document(model.getDocumentId());
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("status", "pending");
+                docRef.update(updates)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d("rejected", "Document updated successfully!");
+                                JSONArray array = new JSONArray();
+                                array.put(model.getUserDetails().get("userFcmToken"));
+                                System.out.println(array);
+                                FCMSend.pushNotificationMultiple(v.getContext(), array, "Your notification has been rejected", "Please check the faults and update it", "notificationUpdater");
+//                                FCMSend.pushNotification(v.getContext(),model.getUserFcmToken(),"Your notification has been rejected","check the notification section and update it","notificationUpdater");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("rejected", "Error updating document", e);
+                            }
+                        });
+
             }
         });
 
@@ -148,16 +175,17 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                 ArrayList<Task<QuerySnapshot>> tasks = new ArrayList<>();
 
                 if (workLocations != null && !workLocations.isEmpty()) {
+                    Log.d("WorkLocations",String.valueOf(workLocations));
                     tasks.add(usersCollection.whereIn("WorkLocation", workLocations).get());
                 }
                 if (departmentTypes != null && !departmentTypes.isEmpty()) {
+                    Log.d("WorkLocations",String.valueOf(departmentTypes));
                     tasks.add(usersCollection.whereArrayContainsAny("DepartmentTypes", departmentTypes).get());
                 }
                 if (genders != null && !genders.isEmpty()) {
+                    Log.d("WorkLocations",String.valueOf(genders));
                     tasks.add(usersCollection.whereIn("Gender", genders).get());
                 }
-
-// Wait for all tasks to complete before executing any further code
                 Tasks.whenAllSuccess(tasks).addOnSuccessListener(new OnSuccessListener<List<Object>>() {
                     @Override
                     public void onSuccess(List<Object> objects) {
@@ -188,26 +216,25 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
 
 //                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
                         Log.d("fcm", String.valueOf(array));
-                        FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "please check");
+                        System.out.println(array);
+                        FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "notificationUpdater");
                         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
                         if (mAuth.getCurrentUser() != null) {
-                            Toast.makeText(v.getContext(), "User is authenticated", Toast.LENGTH_SHORT).show();
-                            DocumentReference mRef = FirebaseFirestore.getInstance().collection("notifications").document(model.getDocumentId());
-                            Map<String,Object> updatedMap = new HashMap<>();
-                            updatedMap.put("status","close");
-                            mRef.set(updatedMap)
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            DocumentReference docRef = db.collection("notifications").document(model.getDocumentId());
+                            Map<String, Object> updates = new HashMap<>();
+                            updates.put("status", "close");
+                            docRef.update(updates)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
-                                        public void onSuccess(Void unused) {
-                                            Toast.makeText(v.getContext(), "status updated", Toast.LENGTH_SHORT).show();
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d("rejected", "Document updated successfully!");
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(v.getContext(), "status not updated", Toast.LENGTH_SHORT).show();
-                                            Log.d("updatingError",e.getLocalizedMessage());
+                                            Log.e("rejected", "Error updating document", e);
                                         }
                                     });
                         } else {
@@ -221,6 +248,8 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                         Log.d("Firestore", "Error getting documents: ", e);
                     }
                 });
+
+
 
 
 //                query.get().addOnCompleteListener(task -> {

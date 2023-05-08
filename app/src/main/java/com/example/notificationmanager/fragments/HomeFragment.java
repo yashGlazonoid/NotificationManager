@@ -54,7 +54,7 @@ public class HomeFragment extends Fragment {
     private static ArrayList<String> finalDepartmentList = new ArrayList<>();
     private static ArrayList<String> finalGenderList = new ArrayList<>();
     private ArrayList<String> items;
-    private ChoiceAdapter adapter;
+    private ChoiceAdapter adapter,locationAdapter;
     private ChoiceAdapter genderAdapter;
 
     private String documentId;
@@ -378,8 +378,8 @@ public class HomeFragment extends Fragment {
                             if (document.exists()){
                                 locationList = (ArrayList<String>) document.get("Locations");
                                 Log.d("Location",locationList.toString());
-                                ChoiceAdapter choiceAdapter = new ChoiceAdapter(locationList,finalLocationList,"Location");
-                                binding.locationRv.setAdapter(choiceAdapter);
+                                locationAdapter = new ChoiceAdapter(locationList,finalLocationList,"Location");
+                                binding.locationRv.setAdapter(locationAdapter);
                                 if (isAdded()){
                                     binding.locationRv.setLayoutManager(new LinearLayoutManager(requireContext()));
                                 }
@@ -484,6 +484,7 @@ public class HomeFragment extends Fragment {
         String formattedDate = sdf.format(date);
         userDetails.put("date",formattedDate);
         userDetails.put("time",System.currentTimeMillis());
+        userDetails.put("userFcmToken","fcIcc07fTp6tplyM7LlCkF:APA91bF8MHi3rHRQL1iHj8mKyTi3VNpxonzCpya10Z255_lbh6Ry42BKqWCEkF6uKKwPxMeAjTX-gVwEUxU0EMpRRTI9UWq0aX8QuhiFBISHL8Yb3GnCNgEY0h0s4ee_xqq5pQhvVg-9");
         userDetails.put("notificationCreatedBy",auth.getCurrentUser().getDisplayName());
         data.put("userDetails",userDetails);
         data.put("status","open");
@@ -497,6 +498,9 @@ public class HomeFragment extends Fragment {
 
                         binding.desceEt.setText("");
                         binding.tittleEt.setText("");
+                        adapter.uncheckAll();
+                        genderAdapter.uncheckAll();
+                        locationAdapter.uncheckAll();
 
                     }
                 })

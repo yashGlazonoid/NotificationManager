@@ -14,6 +14,8 @@ public class NotificationModel {
     private boolean isApproved;
     private Map<String, Boolean> query;
 
+    private Map<String,Object> userDetails;
+
     String status;
 
     public String getStatus() {
@@ -92,7 +94,15 @@ public class NotificationModel {
 //    }
 
 
-    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, Map<String, Boolean> query, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
+    public Map<String, Object> getUserDetails() {
+        return userDetails;
+    }
+
+    public void setUserDetails(Map<String, Object> userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, Map<String, Boolean> query, Map<String, Object> userDetails, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
         this.id = id;
         this.documentId = documentId;
         this.title = title;
@@ -102,6 +112,7 @@ public class NotificationModel {
         this.locations = locations;
         this.isApproved = isApproved;
         this.query = query;
+        this.userDetails = userDetails;
         this.status = status;
         this.dateStartFrom = dateStartFrom;
         this.dateTo = dateTo;
