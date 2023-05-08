@@ -61,7 +61,7 @@ public class HomeFragment extends Fragment {
     private int checkDatePicker = 0;
 
     private String ageEt;
-    private int checkForSpinner =0 ;
+    private int checkForSpinner =2 ;
     private String ageShouldBe;
     public HomeFragment() {
         // Required empty public constructor
@@ -470,15 +470,27 @@ public class HomeFragment extends Fragment {
             data.put("locations", finalLocationList);
         }
         if (checkForSpinner == 0){
-            data.put("age",binding.ageEt.getText().toString().trim());
-            data.put("ageShouldBe",ageShouldBe);
-            query.put("age",true);
-
+            if (!binding.ageEt.getText().toString().isEmpty()){
+                data.put("age",binding.ageEt.getText().toString().trim());
+                data.put("ageShouldBe",ageShouldBe);
+                query.put("age",true);
+                query.put("date",false);
+            }else{
+                query.put("age",false);
+                query.put("date",false);
+            }
         }
         else{
-            data.put("dateStartFrom",binding.joinDateFromBt.getText().toString().trim());
-            data.put("dateTo",binding.joinDateToBt.getText().toString().trim());
-            query.put("date",true);
+            if (checkDatePicker==1){
+                data.put("dateStartFrom",binding.joinDateFromBt.getText().toString().trim());
+                data.put("dateTo",binding.joinDateToBt.getText().toString().trim());
+                query.put("date",true);
+                query.put("age",false);
+            }
+            else{
+                query.put("date",false);
+                query.put("age",false);
+            }
         }
         Log.d("CheckForSpinner",String.valueOf(checkForSpinner));
         data.put("title", title);

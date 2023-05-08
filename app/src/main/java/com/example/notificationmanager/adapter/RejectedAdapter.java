@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,6 +50,20 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         holder.notificationTitle.setText(model.getTitle());
         holder.notificationDesc.setText(model.getDescription());
 
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "This is qorking" + model.getQuery().get("age"), Toast.LENGTH_SHORT).show();
+                if (Boolean.TRUE.equals(model.getQuery().get("age"))){
+                    Toast.makeText(v.getContext(), "This is working true"+ model.getDocumentId(), Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(v.getContext(), "This is working false", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+
         holder.approve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,9 +75,10 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                 ArrayList<String> departmentTypes = model.getDepartments();
                 ArrayList<String> genders = model.getGenders();
 
+
+
                 ArrayList<Task<QuerySnapshot>> tasks = new ArrayList<>();
 
-// Add each query task to the tasks list
                 if (workLocations != null && !workLocations.isEmpty()) {
                     tasks.add(usersCollection.whereIn("WorkLocation", workLocations).get());
                 }
