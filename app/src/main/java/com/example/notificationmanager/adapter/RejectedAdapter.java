@@ -1,19 +1,25 @@
 package com.example.notificationmanager.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationmanager.FCMSend;
 import com.example.notificationmanager.R;
+import com.example.notificationmanager.activity.LoginActivity;
 import com.example.notificationmanager.model.NotificationModel;
 import com.example.notificationmanager.model.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -22,7 +28,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -32,7 +40,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel, RejectedAdapter.RejectedViewHolder> {
 
@@ -49,6 +59,57 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
 
         holder.notificationTitle.setText(model.getTitle());
         holder.notificationDesc.setText(model.getDescription());
+        holder.mainNotificationTitle.setText(model.getTitle() + model.getDescription());
+
+        if (Boolean.TRUE.equals(model.getQuery().get("Department"))){
+            holder.departmentHelper.setVisibility(View.VISIBLE);
+            holder.department.setVisibility(View.VISIBLE);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < model.getDepartments().size(); i++) {
+                sb.append(model.getDepartments().get(i));
+                if (i != model.getDepartments().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            holder.department.setText(sb.toString());
+        }
+        if (Boolean.TRUE.equals(model.getQuery().get("Gender"))){
+            holder.genderHelper.setVisibility(View.VISIBLE);
+            holder.gender.setVisibility(View.VISIBLE);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < model.getGenders().size(); i++) {
+                sb.append(model.getGenders().get(i));
+                if (i != model.getGenders().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            holder.gender.setText(sb.toString());
+        }
+
+        if (Boolean.TRUE.equals(model.getQuery().get("Location"))){
+            holder.locationHelper.setVisibility(View.VISIBLE);
+            holder.location.setVisibility(View.VISIBLE);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < model.getLocations().size(); i++) {
+                sb.append(model.getLocations().get(i));
+                if (i != model.getLocations().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            holder.location.setText(sb.toString());
+        }
+        if (Boolean.TRUE.equals(model.getQuery().get("age"))){
+            holder.ageHelper.setVisibility(View.VISIBLE);
+            holder.age.setVisibility(View.VISIBLE);
+            holder.age.setText(model.getAgeShouldBe() + " " + model.getAge());
+
+        }
+        if (Boolean.TRUE.equals(model.getQuery().get("date"))){
+            holder.date.setVisibility(View.VISIBLE);
+            holder.dateHelper.setVisibility(View.VISIBLE);
+            holder.date.setText("From "+model.getDateStartFrom() + " To " + model.getDateTo() );
+
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,10 +122,17 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     Toast.makeText(v.getContext(), "This is working false", Toast.LENGTH_SHORT).show();
 
                 }
+                if (holder.secondaryCardView.getVisibility() == View.VISIBLE){
+                    TransitionManager.beginDelayedTransition(holder.mainCardView, new AutoTransition());
+                    holder.secondaryCardView.setVisibility(View.GONE);
+                }else {
+                    TransitionManager.beginDelayedTransition(holder.mainCardView, new AutoTransition());
+                    holder.secondaryCardView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
-        holder.approve.setOnClickListener(new View.OnClickListener() {
+        holder.approveBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONArray array = new JSONArray();
@@ -117,8 +185,35 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
 //                        Gson gson = new Gson();
 //                        array = gson.toJsonTree(tokenList).getAsJsonArray();
 //                        System.out.println(array);
+
+//                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
                         Log.d("fcm", String.valueOf(array));
                         FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "please check");
+                        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+                        if (mAuth.getCurrentUser() != null) {
+                            Toast.makeText(v.getContext(), "User is authenticated", Toast.LENGTH_SHORT).show();
+                            DocumentReference mRef = FirebaseFirestore.getInstance().collection("notifications").document(model.getDocumentId());
+                            Map<String,Object> updatedMap = new HashMap<>();
+                            updatedMap.put("status","close");
+                            mRef.set(updatedMap)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Toast.makeText(v.getContext(), "status updated", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(v.getContext(), "status not updated", Toast.LENGTH_SHORT).show();
+                                            Log.d("updatingError",e.getLocalizedMessage());
+                                        }
+                                    });
+                        } else {
+                            v.getContext().startActivity(new Intent(v.getContext(), LoginActivity.class));
+                        }
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -283,17 +378,39 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
     public static class RejectedViewHolder extends RecyclerView.ViewHolder {
         TextView notificationTitle;
         TextView notificationDesc;
-        ImageView approve;
-        ImageView reject;
+        TextView mainNotificationTitle;
         ImageView notificationImage;
+        CardView mainCardView;
+        CardView secondaryCardView;
+
+        TextView location,department,gender,age;
+        TextView departmentHelper,locationHelper,genderHelper,ageHelper,dateHelper,date;
+        Button approveBt , rejectBt;
 
         public RejectedViewHolder(View itemView) {
             super(itemView);
-            notificationTitle = itemView.findViewById(R.id.notificationTitleTT);
+            notificationTitle = itemView.findViewById(R.id.notificationTitle);
             notificationDesc = itemView.findViewById(R.id.notificationDesc);
-            approve = itemView.findViewById(R.id.approveBt);
-            reject = itemView.findViewById(R.id.rejectBt);
-            notificationImage = itemView.findViewById(R.id.notificationIV);
+            notificationImage = itemView.findViewById(R.id.notificationImage);
+            mainNotificationTitle = itemView.findViewById(R.id.mainNotificationTitle);
+            mainCardView = itemView.findViewById(R.id.mainCardView);
+            secondaryCardView = itemView.findViewById(R.id.secondaryCardView);
+
+            location = itemView.findViewById(R.id.notificationLocation);
+            department = itemView.findViewById(R.id.notificationDepartments);
+            gender = itemView.findViewById(R.id.notificationGender);
+            age = itemView.findViewById(R.id.notificationAge);
+
+            locationHelper = itemView.findViewById(R.id.locationHelper);
+            genderHelper = itemView.findViewById(R.id.genderHelper);
+            ageHelper = itemView.findViewById(R.id.ageHelper);
+            departmentHelper = itemView.findViewById(R.id.departmentHelper);
+            dateHelper = itemView.findViewById(R.id.dateHelper);
+            date = itemView.findViewById(R.id.notificationDate);
+
+            approveBt = itemView.findViewById(R.id.acceptBt);
+            rejectBt = itemView.findViewById(R.id.rejectBt);
+
         }
     }
 }

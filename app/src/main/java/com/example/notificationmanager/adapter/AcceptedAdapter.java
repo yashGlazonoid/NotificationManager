@@ -26,7 +26,7 @@ public class AcceptedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         holder.notificationDesc.setText(model.getDescription());
 
 
-        if (model.isApproved()){
+        if (model.getStatus().equals("close")){
             holder.status.setImageResource(R.drawable.ic_green);
         }
         else{

@@ -42,7 +42,7 @@ public class RejectedFragment extends Fragment {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference collection = db.collection("notifications");
-        Query query = collection.whereNotEqualTo("isApproved",true);
+        Query query = collection.whereNotEqualTo("status","close");
         FirestoreRecyclerOptions<NotificationModel> options =
                 new FirestoreRecyclerOptions.Builder<NotificationModel>()
                         .setQuery(query, NotificationModel.class)

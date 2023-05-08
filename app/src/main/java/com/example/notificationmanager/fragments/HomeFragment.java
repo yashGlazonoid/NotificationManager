@@ -24,13 +24,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class HomeFragment extends Fragment {
@@ -228,8 +229,15 @@ public class HomeFragment extends Fragment {
 //                    }
 //                });
 
+        getUserData();
 
         return binding.getRoot();
+    }
+
+    private void getUserData(){
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String currentUser = Objects.requireNonNull(auth.getCurrentUser()).getUid();
+        Log.d("currentUser",currentUser);
     }
 
     private void setDate(String dateType) {
@@ -292,7 +300,7 @@ public class HomeFragment extends Fragment {
                     binding.ageCardView.setVisibility(View.GONE);
                     String title = documentSnapshot.getString("title");
                     String description = documentSnapshot.getString("description");
-                    boolean isApproved = documentSnapshot.getBoolean("isApproved");
+//                    boolean isApproved = documentSnapshot.getBoolean("isApproved");
                     ArrayList<String> departments = (ArrayList<String>) documentSnapshot.get("departments");
                     ArrayList<String> genders = (ArrayList<String>) documentSnapshot.get("genders");
                     ArrayList<String> locations = (ArrayList<String>) documentSnapshot.get("locations");
@@ -312,7 +320,7 @@ public class HomeFragment extends Fragment {
                                 updates.put("departments", departments);
                                 updates.put("genders", genders);
                                 updates.put("locations", locations);
-                                updates.put("isApproved", false);
+//                                updates.put("isApproved", false);
 
                                 docRef.set(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -359,21 +367,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-    }
-
-    private void sendNotificationToUserNew(String s) {
-        // Get the recipient's FCM registration token
-        String recipientToken = s;
-
-        Map<String, String> data = new HashMap<>();
-        data.put("title", "Hello from Firebase!");
-        data.put("body", "This is a test notification for users above 20");
-        data.put("image", "https://example.com/image.jpg");
-
-        RemoteMessage.Builder messageBuilder = new RemoteMessage.Builder(recipientToken);
-        messageBuilder.setData(data);
-
-        FirebaseMessaging.getInstance().send(messageBuilder.build());
     }
     void getDataFromFirebase(){
         FirebaseFirestore.getInstance().collection("ListOfList")
@@ -431,22 +424,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void sendNotificationToUser(String fcmToken) {
-        FirebaseMessaging messaging = FirebaseMessaging.getInstance();
-
-        Map<String, String> data = new HashMap<>();
-        data.put("title", "Hello from Firebase!");
-        data.put("body", "This is a test notification for users above 20");
-        data.put("image", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeLJnzgcw-0NEcuH0joPa1I_-MCWg-yJ_v1FrDzT8&s");
-
-        RemoteMessage.Builder messageBuilder = new RemoteMessage.Builder(fcmToken);
-        messageBuilder.setData(data);
-
-        messaging.send(messageBuilder.build());
-        Log.d("NotificationSend","NotificationSend");
-
-    }
-
     void setDataForAcceptance(Map<String, Boolean> query,int checkForSpinner){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
@@ -495,9 +472,21 @@ public class HomeFragment extends Fragment {
         Log.d("CheckForSpinner",String.valueOf(checkForSpinner));
         data.put("title", title);
         data.put("description", description);
-        data.put("isApproved", "No");
+//        data.put("isApproved", "No");
         data.put("documentId",documentId);
         data.put("query",query);
+        Map<String, Object> userDetails = new HashMap<>();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        userDetails.put("uid",auth.getCurrentUser().getUid().toString());
+        userDetails.put("userPhoto",auth.getCurrentUser().getPhotoUrl().toString());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+        String formattedDate = sdf.format(date);
+        userDetails.put("date",formattedDate);
+        userDetails.put("time",System.currentTimeMillis());
+        userDetails.put("notificationCreatedBy",auth.getCurrentUser().getDisplayName());
+        data.put("userDetails",userDetails);
+        data.put("status","open");
 
         newNotificationRef.set(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {

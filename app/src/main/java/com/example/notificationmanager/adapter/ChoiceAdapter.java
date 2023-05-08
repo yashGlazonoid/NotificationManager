@@ -38,6 +38,13 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
     public void onBindViewHolder(@NonNull ChoiceViewHolder holder, int position) {
         String current = mList.get(position);
         holder.choiceTitle.setText(current);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.addBt.setChecked(!holder.addBt.isChecked());
+            }
+        });
         holder.addBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
