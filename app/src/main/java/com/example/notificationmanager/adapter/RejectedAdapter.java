@@ -1,6 +1,7 @@
 package com.example.notificationmanager.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.transition.AutoTransition;
 import android.transition.ChangeBounds;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,6 +31,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -133,29 +136,7 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         holder.rejectBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference docRef = db.collection("notifications").document(model.getDocumentId());
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("status", "pending");
-                docRef.update(updates)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d("rejected", "Document updated successfully!");
-                                JSONArray array = new JSONArray();
-                                array.put(model.getUserDetails().get("userFcmToken"));
-                                System.out.println(array);
-                                FCMSend.pushNotificationMultiple(v.getContext(), array, "Your notification has been rejected", "Please check the faults and update it", "notificationUpdater");
-//                                FCMSend.pushNotification(v.getContext(),model.getUserFcmToken(),"Your notification has been rejected","check the notification section and update it","notificationUpdater");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("rejected", "Error updating document", e);
-                            }
-                        });
-
+                showDialog(v.getContext(),model);
             }
         });
 
@@ -396,6 +377,60 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
             }
         });
     }
+
+    private void showDialog(Context context, NotificationModel model) {
+        // Inflate the dialog layout
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialig_layout, null);
+
+        // Find the dialog views
+        TextInputEditText editText = dialogView.findViewById(R.id.edit_text);
+
+        // Create the dialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(dialogView);
+        builder.setTitle("Provide Rejection Reason");
+        builder.setPositiveButton("Reject", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Handle positive button click
+                String text = editText.getText().toString();
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection("notifications").document(model.getDocumentId());
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("status", "pending");
+                updates.put("rejectionReason",text);
+                docRef.update(updates)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d("rejected", "Document updated successfully!");
+                                JSONArray array = new JSONArray();
+                                array.put(model.getUserDetails().get("userFcmToken"));
+                                System.out.println(array);
+                                FCMSend.pushNotificationMultiple(context, array, "Your notification has been rejected","Reason : "+ text, "notificationUpdater");
+//                                FCMSend.pushNotification(v.getContext(),model.getUserFcmToken(),"Your notification has been rejected","check the notification section and update it","notificationUpdater");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("rejected", "Error updating document", e);
+                            }
+                        });
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
 
     @NonNull
     @Override

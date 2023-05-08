@@ -16,6 +16,16 @@ public class NotificationModel {
 
     private Map<String,Object> userDetails;
 
+    public Map<String, Object> getPendingNotification() {
+        return pendingNotification;
+    }
+
+    public void setPendingNotification(Map<String, Object> pendingNotification) {
+        this.pendingNotification = pendingNotification;
+    }
+
+    private Map<String,Object> pendingNotification;
+
     String status;
 
     public String getStatus() {
