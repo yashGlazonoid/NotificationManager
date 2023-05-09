@@ -12,6 +12,7 @@ import com.example.notificationmanager.adapter.AcceptedAdapter;
 import com.example.notificationmanager.databinding.FragmentAcceptedBinding;
 import com.example.notificationmanager.model.NotificationModel;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -22,6 +23,7 @@ public class AcceptedFragment extends Fragment {
     private FragmentAcceptedBinding binding;
     private ArrayList<NotificationModel> notificationList;
     private AcceptedAdapter adapter;
+
 
 
     public AcceptedFragment() {
@@ -39,6 +41,7 @@ public class AcceptedFragment extends Fragment {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference collection = db.collection("notifications");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         FirestoreRecyclerOptions<NotificationModel> options =
                 new FirestoreRecyclerOptions.Builder<NotificationModel>()
                         .setQuery(collection, NotificationModel.class)

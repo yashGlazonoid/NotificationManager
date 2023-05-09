@@ -50,6 +50,7 @@ import java.util.Map;
 
 public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel, RejectedAdapter.RejectedViewHolder> {
 
+    private StringBuilder mainString= new StringBuilder();
     public RejectedAdapter(@NonNull FirestoreRecyclerOptions<NotificationModel> options, Context context) {
         super(options);
     }
@@ -63,9 +64,36 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
 
         holder.notificationTitle.setText(model.getTitle());
         holder.notificationDesc.setText(model.getDescription());
-        holder.mainNotificationTitle.setText(model.getTitle() + model.getDescription());
+//        holder.mainNotificationTitle.setText(model.getTitle() + model.getDescription());
+        mainString.setLength(0);
+        mainString.append("This notice is for ");
 
-        if (Boolean.TRUE.equals(model.getQuery().get("Department"))){
+        if (Boolean.TRUE.equals(model.getQuery().get("Gender"))) {
+            holder.genderHelper.setVisibility(View.VISIBLE);
+            holder.gender.setVisibility(View.VISIBLE);
+            List<String> genders = model.getGenders();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < genders.size(); i++) {
+                sb.append(genders.get(i));
+                if (genders.size() == 2 && i == 0) {
+                    sb.append(" and ");
+                } else if (i != genders.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            holder.gender.setText(sb);
+            mainString.append(sb.toString());
+            mainString.append(" employees ");
+        } else {
+            mainString.append("all employees ");
+        }
+
+        if (Boolean.TRUE.equals(model.getQuery().get("Department"))) {
+            if (!Boolean.TRUE.equals(model.getQuery().get("Gender"))) {
+                mainString.append("who ");
+            }
+            mainString.append("work in ");
+
             holder.departmentHelper.setVisibility(View.VISIBLE);
             holder.department.setVisibility(View.VISIBLE);
             StringBuilder sb = new StringBuilder();
@@ -75,22 +103,14 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     sb.append(", ");
                 }
             }
-            holder.department.setText(sb.toString());
-        }
-        if (Boolean.TRUE.equals(model.getQuery().get("Gender"))){
-            holder.genderHelper.setVisibility(View.VISIBLE);
-            holder.gender.setVisibility(View.VISIBLE);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < model.getGenders().size(); i++) {
-                sb.append(model.getGenders().get(i));
-                if (i != model.getGenders().size() - 1) {
-                    sb.append(", ");
-                }
-            }
-            holder.gender.setText(sb.toString());
+            holder.department.setText(sb);
+            mainString.append(sb.toString());
+            mainString.append(" department(s) ");
         }
 
-        if (Boolean.TRUE.equals(model.getQuery().get("Location"))){
+        if (Boolean.TRUE.equals(model.getQuery().get("Location"))) {
+            mainString.append("at ");
+
             holder.locationHelper.setVisibility(View.VISIBLE);
             holder.location.setVisibility(View.VISIBLE);
             StringBuilder sb = new StringBuilder();
@@ -100,20 +120,36 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     sb.append(", ");
                 }
             }
-            holder.location.setText(sb.toString());
+            holder.location.setText(sb);
+            mainString.append(sb.toString());
+            mainString.append(" location(s) ");
         }
-        if (Boolean.TRUE.equals(model.getQuery().get("age"))){
+
+        if (Boolean.TRUE.equals(model.getQuery().get("age"))) {
             holder.ageHelper.setVisibility(View.VISIBLE);
             holder.age.setVisibility(View.VISIBLE);
-            holder.age.setText(model.getAgeShouldBe() + " " + model.getAge());
-
+            holder.age.setText("above " + model.getAge() + " years old");
+            if (!Boolean.TRUE.equals(model.getQuery().get("Gender")) && !Boolean.TRUE.equals(model.getQuery().get("Department"))) {
+                mainString.append("all employees ");
+            }
+            mainString.append("who are above ");
+            mainString.append(model.getAge());
+            mainString.append(" years old ");
         }
-        if (Boolean.TRUE.equals(model.getQuery().get("date"))){
+
+        if (Boolean.TRUE.equals(model.getQuery().get("date"))) {
             holder.date.setVisibility(View.VISIBLE);
             holder.dateHelper.setVisibility(View.VISIBLE);
-            holder.date.setText("From "+model.getDateStartFrom() + " To " + model.getDateTo() );
-
+            holder.date.setText("from " + model.getDateStartFrom() + " to " + model.getDateTo());
+            mainString.append("between ");
+            mainString.append(model.getDateStartFrom());
+            mainString.append(" and ");
+            mainString.append(model.getDateTo());
+            mainString.append(" ");
         }
+
+        holder.mainNotificationTitle.setText(mainString.toString());
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,12 +213,12 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                             for (QueryDocumentSnapshot document : querySnapshot) {
                                 User user = document.toObject(User.class);
 
-                                if (tokenList.contains(user.getFCMToken())){
-                                    Log.d("fcm","Already in");
-                                }
-                                else{
+                                if (!tokenList.contains(user.getFCMToken())) {
                                     tokenList.add(user.getFCMToken());
+                                } else {
+                                    Log.d("fcm", "Token already in list: " + user.getFCMToken());
                                 }
+
 //                                array.put(user.getFCMToken());
                             }
                         }
@@ -191,9 +227,6 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                         }
 
                         System.out.println(array);
-//                        Gson gson = new Gson();
-//                        array = gson.toJsonTree(tokenList).getAsJsonArray();
-//                        System.out.println(array);
 
 //                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
                         Log.d("fcm", String.valueOf(array));
@@ -229,151 +262,6 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                         Log.d("Firestore", "Error getting documents: ", e);
                     }
                 });
-
-
-
-
-//                query.get().addOnCompleteListener(task -> {
-//                    if (task.isSuccessful()) {
-//                        for (QueryDocumentSnapshot document : task.getResult()) {
-//                            User user = document.toObject(User.class);
-//                            array.put(user.getFCMToken());
-//                        }
-//                        Log.d("fcm",String.valueOf(array));
-//                        FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "please check");
-//                    } else {
-//                        Log.d("Firestore", "Error getting documents: ", task.getException());
-//                    }
-//                });
-
-
-//                if (Boolean.TRUE.equals(model.getQuery().get("Location"))){
-//                    Log.d("ModelQuery","Location "+model.getQuery().get("Location").toString());
-//                    query = query.whereIn("WorkLocation",workLocations);
-//                    querry++;
-//                }
-//                if (Boolean.TRUE.equals(model.getQuery().get("Department"))){
-//                    Log.d("ModelQuery","Department "+model.getQuery().get("Department").toString());
-//                    query = query.whereArrayContainsAny("DepartmentTypes",departmentTypes);
-//                    querry++;
-//                }
-//                if (Boolean.TRUE.equals(model.getQuery().get("Gender"))){
-//                    Log.d("ModelQuery","Gender "+model.getQuery().get("Gender").toString());
-//                    query = query.whereIn("Gender",genders);
-//                    querry++;
-//                }
-
-
-//                if (Boolean.TRUE.equals(model.getQuery().get("Location"))){
-//                    Log.d("ModelQuery","Location "+model.getQuery().get("Location").toString());
-//                    query = query.whereIn("WorkLocation",workLocations);
-//                }
-//                if (Boolean.TRUE.equals(model.getQuery().get("Department"))){
-//                    Log.d("ModelQuery","Department "+model.getQuery().get("Department").toString());
-//                    query = query.whereIn("DepartmentTypes",departmentTypes);
-//                }
-//                if (Boolean.TRUE.equals(model.getQuery().get("Gender"))){
-//                    Log.d("ModelQuery","Gender "+model.getQuery().get("Gender").toString());
-//                    query=query.whereIn("Gender",genders);
-//                }
-
-//                Log.d("RejectedAdapter", "After Query: " + query.toString());
-
-
-//                query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//                        Log.d("Insidethis","inside the success listener");
-//                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-//                            // Get the document data as a User object
-//                            User user = document.toObject(User.class);
-//
-//                            array.put(user.getFCMToken());
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Location"))) {
-////                                if (workLocations.contains(user.getWorkLocation())) {
-////                                    Log.d("ModelQuery","Location "+model.getQuery().get("Location").toString());
-////
-////                                    array.put(user.getFCMToken());
-////                                }
-////                            }
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Department"))) {
-////                                if (departmentTypes.containsAll(user.getDepartmentTypes())) {
-////                                    Log.d("ModelQuery","Department "+model.getQuery().get("Department").toString());
-////                                    array.put(user.getFCMToken());
-////                                }
-////                            }
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Gender"))) {
-////                                if (genders.contains(user.getGender())) {
-////                                    Log.d("ModelQuery","Gender "+model.getQuery().get("Gender").toString());
-////                                    array.put(user.getFCMToken());
-////                                }
-////                            }
-//                        }
-//                        FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "please check");
-//                        Log.d("fcmArray", String.valueOf(array));
-//
-//                        // Iterate through the query results
-////                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-////                            // Get the document data as a User object
-////                            User user = document.toObject(User.class);
-////
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Location"))){
-////                                Log.d("ModelQuery","Location "+model.getQuery().get("Location").toString());
-////                                array.put(user.getFCMToken());
-////                            }
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Department"))){
-////                                Log.d("ModelQuery","Department "+model.getQuery().get("Department").toString());
-////
-////                                for (int i = 0; i < array.length(); i++) {
-////                                    try {
-////                                        Log.d("fcm","inside the try department");
-////                                        if (!array.getString(i).equals(user.getFCMToken())) {
-////                                            array.put(user.getFCMToken());
-////                                            break;
-////                                        }
-////                                    } catch (JSONException e) {
-////                                        throw new RuntimeException(e);
-////                                    }
-////                                }
-//////                                array.put(user.getFCMToken());
-////
-////                            }
-////                            if (Boolean.TRUE.equals(model.getQuery().get("Gender"))){
-////                                Log.d("ModelQuery","Gender "+model.getQuery().get("Gender").toString());
-////                                for (int i = 0; i < array.length(); i++) {
-////                                    try {
-////                                        Log.d("fcm","inside the try gender");
-////
-////                                        if (!array.getString(i).equals(user.getFCMToken())) {
-////                                            array.put(user.getFCMToken());
-////                                            break;
-////                                        }
-////                                    } catch (JSONException e) {
-////                                        throw new RuntimeException(e);
-////                                    }
-////                                }
-//////                                array.put(user.getFCMToken());
-////
-////                            }
-////
-//////                            array.put(user.getFCMToken());
-//////                            Log.d("userFcmToken",user.getFCMToken());
-////                        }
-////                        FCMSend.pushNotificationMultiple(v.getContext(),array,model.getTitle(),model.getDescription(),"please check"  );
-////                        Log.d("fcmArray",String.valueOf(array));
-//
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.d("Insidethis","inside the faliure listener");
-//
-//                        Log.e("TAG", "Error getting users: ", e);
-//                    }
-//                });
-
-//                array.put("cEzbCvUXQgeAqhJTg03Iwj:APA91bE4HZlGsmf95P7Kthvm6t3zlPwzqbIPk0jKGAN2Gm65dI5meM2tNRoQ9IunrjwsxoSaJGBIewGiETLDEu7bA8qMUJ4QCDn2VXZBeFdbP02u-A6DOhZxOipTIvL0XeL8-OFyHvxv");
-
             }
         });
     }
@@ -474,7 +362,6 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
 
             approveBt = itemView.findViewById(R.id.acceptBt);
             rejectBt = itemView.findViewById(R.id.rejectBt);
-
         }
     }
 }
