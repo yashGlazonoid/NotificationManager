@@ -172,8 +172,7 @@ public class HomeFragment extends Fragment {
         genderList.clear();
 
 
-        String[] age = {"Age","Date of Joining"};
-
+        String[] age = {"Age"};
 
         genderList.add("Male");
         genderList.add("Female");
@@ -432,6 +431,20 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private int returnTime() {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HHmm");
+        String millisInString = dateFormat.format(new Date());
+        return Integer.parseInt(millisInString);
+    }
+
+    private long returnDateNumber() {
+        Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        String formattedDate = df.format(c);
+        return Long.parseLong(formattedDate);
     }
 
     void setDataForAcceptance(Map<String, Boolean> query,int checkForSpinner){
