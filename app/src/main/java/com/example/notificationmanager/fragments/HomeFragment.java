@@ -527,6 +527,9 @@ public class HomeFragment extends Fragment {
                             adapter.uncheckAll();
                             genderAdapter.uncheckAll();
                             locationAdapter.uncheckAll();
+                            binding.ageEt.setText("");
+                            binding.ageLessThan.setChecked(false);
+                            binding.ageGreaterThan.setChecked(false);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -552,6 +555,9 @@ public class HomeFragment extends Fragment {
                             adapter.uncheckAll();
                             genderAdapter.uncheckAll();
                             locationAdapter.uncheckAll();
+                            binding.ageEt.setText("");
+                            binding.ageLessThan.setChecked(false);
+                            binding.ageGreaterThan.setChecked(false);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

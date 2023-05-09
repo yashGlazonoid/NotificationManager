@@ -53,6 +53,8 @@ public class RejectedFragment extends Fragment {
         binding.checkRv.setAdapter(adapter);
 
 
+
+
         return binding.getRoot();
     }
 

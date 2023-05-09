@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notificationmanager.adapter.AcceptedAdapter;
 import com.example.notificationmanager.databinding.FragmentAcceptedBinding;
@@ -47,9 +48,22 @@ public class AcceptedFragment extends Fragment {
                         .setQuery(collection, NotificationModel.class)
                         .build();
 
-        adapter = new AcceptedAdapter(options,AcceptedFragment.this);
+        adapter = new AcceptedAdapter(options, AcceptedFragment.this);
         binding.approvedRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.approvedRv.setAdapter(adapter);
+
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                if (adapter.getItemCount() == 0) {
+                    binding.noNotificationsText.setVisibility(View.VISIBLE);
+                } else {
+                    binding.noNotificationsText.setVisibility(View.GONE);
+                }
+            }
+        });
+
 
 //        getData();
 

@@ -131,11 +131,11 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         if (Boolean.TRUE.equals(model.getQuery().get("age"))) {
             holder.ageHelper.setVisibility(View.VISIBLE);
             holder.age.setVisibility(View.VISIBLE);
-            holder.age.setText("above " + model.getAge() + " years old");
+            holder.age.setText(model.getAgeShouldBe()+" " + model.getAge() + " years old");
             if (!Boolean.TRUE.equals(model.getQuery().get("Gender")) && !Boolean.TRUE.equals(model.getQuery().get("Department"))) {
                 mainString.append("all employees ");
             }
-            mainString.append("who are above ");
+            mainString.append("who are "+model.getAgeShouldBe() + " ");
             mainString.append(model.getAge());
             mainString.append(" years old ");
         }
