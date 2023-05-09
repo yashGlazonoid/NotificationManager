@@ -64,6 +64,8 @@ public class HomeFragment extends Fragment {
     private String ageEt;
     private int checkForSpinner =2 ;
     private String ageShouldBe;
+
+    private String dateFrom , dateTo;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -191,13 +193,15 @@ public class HomeFragment extends Fragment {
                     binding.ageCardView.setVisibility(View.GONE);
                     binding.dateCardView.setVisibility(View.VISIBLE);
                     checkForSpinner = 1;
+                    binding.ageEt.setText("");
+                    binding.ageGreaterThan.setChecked(false);
+                    binding.ageLessThan.setChecked(false);
                 }else if (position==0){
 //                    Toast.makeText(requireContext(), "Zero", Toast.LENGTH_SHORT).show();
                     binding.ageCardView.setVisibility(View.VISIBLE);
                     binding.dateCardView.setVisibility(View.GONE);
                     ageEt = binding.ageEt.getText().toString().trim();
                     checkForSpinner = 0;
-
                 }
             }
 
@@ -248,6 +252,8 @@ public class HomeFragment extends Fragment {
                 Calendar selectedDate = Calendar.getInstance();
                 selectedDate.set(year, monthOfYear, dayOfMonth);
 
+
+
                 if (selectedDate.after(calendar)) { // Check if selected date is after current date
                     Toast.makeText(requireContext(), "Selected date cannot be greater than current date", Toast.LENGTH_SHORT).show();
                     return;
@@ -258,6 +264,8 @@ public class HomeFragment extends Fragment {
 
                 if (dateType.equals("join")){
                     binding.joinDateFromBt.setText(selectedDateString);
+                    long dateInMillis = selectedDate.getTimeInMillis();
+                    dateFrom = String.valueOf(dateInMillis);
                     checkDatePicker =1;
                 }
                 else{
@@ -272,6 +280,8 @@ public class HomeFragment extends Fragment {
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
+                    long dateInMillis = selectedDate.getTimeInMillis();
+                    dateTo = String.valueOf(dateInMillis);
                     binding.joinDateToBt.setText(selectedDateString);
                 }
             }
@@ -459,8 +469,8 @@ public class HomeFragment extends Fragment {
         }
         else{
             if (checkDatePicker==1){
-                data.put("dateStartFrom",binding.joinDateFromBt.getText().toString().trim());
-                data.put("dateTo",binding.joinDateToBt.getText().toString().trim());
+                data.put("dateStartFrom",dateFrom);
+                data.put("dateTo",dateTo);
                 query.put("date",true);
                 query.put("age",false);
             }

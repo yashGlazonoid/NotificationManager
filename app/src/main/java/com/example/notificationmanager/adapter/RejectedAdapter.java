@@ -43,9 +43,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel, RejectedAdapter.RejectedViewHolder> {
@@ -140,11 +143,19 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         if (Boolean.TRUE.equals(model.getQuery().get("date"))) {
             holder.date.setVisibility(View.VISIBLE);
             holder.dateHelper.setVisibility(View.VISIBLE);
-            holder.date.setText("from " + model.getDateStartFrom() + " to " + model.getDateTo());
-            mainString.append("between ");
-            mainString.append(model.getDateStartFrom());
+            long startDate = Long.parseLong(model.getDateStartFrom());
+            long toDate = Long.parseLong(model.getDateTo());
+            Date date = new Date(startDate);
+            Date dateTo = new Date(toDate);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String formattedDateStart = sdf.format(date);
+            String formattedDateTo = sdf.format(dateTo);
+
+            holder.date.setText("from " + formattedDateStart + " to " + formattedDateTo);
+            mainString.append("joined between ");
+            mainString.append(formattedDateStart);
             mainString.append(" and ");
-            mainString.append(model.getDateTo());
+            mainString.append(formattedDateTo);
             mainString.append(" ");
         }
 
@@ -203,6 +214,25 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     Log.d("WorkLocations",String.valueOf(genders));
                     tasks.add(usersCollection.whereIn("Gender", genders).get());
                 }
+                if (model.getAge()!=null && model.getAgeShouldBe()!=null){
+                    Log.d("WorkLocations",String.valueOf(model.getAge() + " " + model.getAgeShouldBe()));
+                    if (model.getAgeShouldBe().equals("Greater than")){
+                        tasks.add(usersCollection.whereGreaterThan("Age",model.getAge()).get());
+                        Log.d("here","we are in greater than");
+                    }else {
+                        tasks.add(usersCollection.whereLessThan("Age",model.getAge()).get());
+                        Log.d("here","we are in less than");
+                    }
+                }
+                if (model.getDateStartFrom() != null && model.getDateTo() != null) {
+                    long startDate = Long.parseLong(model.getDateStartFrom());
+                    long toDate = Long.parseLong(model.getDateTo());
+                    Log.d("joinDate",model.getDateStartFrom());
+                    tasks.add(usersCollection.whereGreaterThan("joinDate", startDate)
+                            .whereLessThan("joinDate", toDate)
+                            .get());
+                }
+
                 Tasks.whenAllSuccess(tasks).addOnSuccessListener(new OnSuccessListener<List<Object>>() {
                     @Override
                     public void onSuccess(List<Object> objects) {
