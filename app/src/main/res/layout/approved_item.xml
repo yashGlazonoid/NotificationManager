@@ -3,10 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="10dp"
     android:padding="10dp"
-    app:cardCornerRadius="10dp"
-    >
+    app:cardCornerRadius="10dp">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -22,7 +22,7 @@
 
         <TextView
             android:id="@+id/notificationTitleTT"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="This is random text"
             app:layout_constraintStart_toEndOf="@id/notificationIV"
@@ -31,10 +31,13 @@
             android:textColor="@color/black"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+
+            app:layout_constraintEnd_toStartOf="@id/status"
             />
         <TextView
             android:id="@+id/notificationDesc"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/notificationTitleTT"
             app:layout_constraintStart_toEndOf="@id/notificationIV"
@@ -42,6 +45,8 @@
             android:textSize="15sp"
             android:text="This is desc"
             android:layout_marginTop="5dp"
+            app:layout_constraintEnd_toStartOf="@id/status"
+            android:layout_marginEnd="10dp"
             />
 
         <ImageView
@@ -53,6 +58,32 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="20dp"
             android:src="@drawable/ic_green"
+            />
+
+        <TextView
+            android:id="@+id/reasonHelper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/notificationIV"
+            android:text="Reason : "
+            android:textSize="16sp"
+            android:textColor="#F31A0B"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:visibility="gone"
+            />
+        <TextView
+            android:id="@+id/reason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="This is the reason "
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/reasonHelper"
+            app:layout_constraintTop_toTopOf="@id/reasonHelper"
+            app:layout_constraintBottom_toBottomOf="@id/reasonHelper"
+            android:visibility="gone"
+
             />
 
 

@@ -30,7 +30,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -79,8 +78,8 @@ public class HomeFragment extends Fragment {
         if (bundle != null) {
             documentId = bundle.getString("documentId");
             Log.d("documentId",documentId);
+            Log.d("DocumentId",documentId);
             getDataFromDocument(documentId);
-
         }
         else {
             getDataFromFirebase();
@@ -108,7 +107,7 @@ public class HomeFragment extends Fragment {
                     }
 
                     if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
-                        setDataForAcceptance(query,checkForSpinner);
+                        setDataForAcceptance(query,checkForSpinner,"no");
                     }
 //                    if (!finalLocationList.isEmpty()&&!finalGenderList.isEmpty()&&!finalDepartmentList.isEmpty()
 //                            && !binding.tittleEt.getText().toString().trim().isEmpty()
@@ -139,13 +138,13 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NonNull Task<String> task) {
-                Toast.makeText(requireContext(), "this is your token" + task.getResult(), Toast.LENGTH_SHORT).show();
-                Log.d("TokenAuth",task.getResult());
-            }
-        });
+//        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+//            @Override
+//            public void onComplete(@NonNull Task<String> task) {
+//                Toast.makeText(requireContext(), "this is your token" + task.getResult(), Toast.LENGTH_SHORT).show();
+//                Log.d("TokenAuth",task.getResult());
+//            }
+//        });
 
         binding.joinDateFromBt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -302,67 +301,69 @@ public class HomeFragment extends Fragment {
                 if (documentSnapshot.exists()) {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.maivCardView.setVisibility(View.VISIBLE);
-                    binding.selectGendertBt.setVisibility(View.GONE);
-                    binding.selectDepartmentBt.setVisibility(View.GONE);
-                    binding.selectLocationBt.setVisibility(View.GONE);
-                    binding.spinner.setVisibility(View.GONE);
-                    binding.ageCardView.setVisibility(View.GONE);
+//                    binding.selectGendertBt.setVisibility(View.GONE);
+//                    binding.selectDepartmentBt.setVisibility(View.GONE);
+//                    binding.selectLocationBt.setVisibility(View.GONE);
+//                    binding.spinner.setVisibility(View.GONE);
+//                    binding.ageCardView.setVisibility(View.GONE);
                     String title = documentSnapshot.getString("title");
                     String description = documentSnapshot.getString("description");
 //                    boolean isApproved = documentSnapshot.getBoolean("isApproved");
                     ArrayList<String> departments = (ArrayList<String>) documentSnapshot.get("departments");
                     ArrayList<String> genders = (ArrayList<String>) documentSnapshot.get("genders");
                     ArrayList<String> locations = (ArrayList<String>) documentSnapshot.get("locations");
+                    Log.d("WorkLocations",String.valueOf(departments));
+                    Log.d("WorkLocations",String.valueOf(genders));
+                    Log.d("WorkLocations",String.valueOf(locations));
                     Log.d("GetNotification", "Notification Title: " + title);
                     binding.tittleEt.setText(title);
                     binding.desceEt.setText(description);
+
+//                    adapter = new ChoiceAdapter(departments,finalDepartmentList,"Department");
+//                    genderAdapter = new ChoiceAdapter(genders,finalGenderList,"Gender");
+//                    locationAdapter = new ChoiceAdapter(locations,finalLocationList,"Location");
+//
+//                    binding.locationRv.setAdapter(locationAdapter);
+//                    binding.locationRv.setLayoutManager(new LinearLayoutManager(getContext()));
+//
+//                    binding.genderRv.setAdapter(genderAdapter);
+//                    binding.genderRv.setLayoutManager(new LinearLayoutManager(getContext()));
+//
+//                    binding.departmentRv.setAdapter(adapter);
+//                    binding.departmentRv.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                    getData();
+                    getDataFromFirebase();
+
                     binding.addBt.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (!binding.tittleEt.getText().toString().trim().isEmpty() && !binding.desceEt.getText().toString().trim().isEmpty()){
-                                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                                DocumentReference docRef = db.collection("notifications").document(documentId);
+                            if (!finalLocationList.isEmpty()){
+                                query.put("Location",true);
+                            }
+                            else{
+                                query.put("Location",false);
+                            }
+                            if (!finalGenderList.isEmpty()){
+                                query.put("Gender",true);
+                            }
+                            else{
+                                query.put("Gender",false);
+                            }
+                            if (!finalDepartmentList.isEmpty()){
+                                query.put("Department",true);
+                            }
+                            else{
+                                query.put("Department",false);
+                            }
 
-                                Map<String, Object> updates = new HashMap<>();
-                                updates.put("title", binding.tittleEt.getText().toString().trim());
-                                updates.put("description", binding.desceEt.getText().toString().trim());
-                                updates.put("departments", departments);
-                                updates.put("genders", genders);
-                                updates.put("locations", locations);
-//                                updates.put("isApproved", false);
-
-                                docRef.set(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        Log.d("UpdateData", "Notification updated successfully");
-                                        Toast.makeText(requireContext(), "Notification Updated Successfully", Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-
-                                        Log.e("UpdateData", "Error updating notification", e);
-                                        Toast.makeText(requireContext(), "Notification Failed to update", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
-
-                                docRef.set(updates)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-
-                                            }
-                                        });
+                            if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
+                                setDataForAcceptance(query,checkForSpinner,"yes");
                             }
                         }
                     });
+
+
                 } else {
                     // Document not found
                     Log.d("GetNotification", "Document not found");
@@ -447,14 +448,11 @@ public class HomeFragment extends Fragment {
         return Long.parseLong(formattedDate);
     }
 
-    void setDataForAcceptance(Map<String, Boolean> query,int checkForSpinner){
+    void setDataForAcceptance(Map<String, Boolean> query, int checkForSpinner, String intent){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
         DocumentReference newNotificationRef = notificationsRef.document();
 
-
-        String documentId = newNotificationRef.getId();
-        Log.d("DocumentId", documentId);
 
         String title = binding.tittleEt.getText().toString().trim();
         String description = binding.desceEt.getText().toString().trim();
@@ -496,7 +494,6 @@ public class HomeFragment extends Fragment {
         data.put("title", title);
         data.put("description", description);
 //        data.put("isApproved", "No");
-        data.put("documentId",documentId);
         data.put("query",query);
         Map<String, Object> userDetails = new HashMap<>();
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -512,29 +509,109 @@ public class HomeFragment extends Fragment {
         data.put("userDetails",userDetails);
         data.put("status","open");
 
-        newNotificationRef.set(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("SetData", "Notification added successfully");
-                        Toast.makeText(requireContext(), "Notification Created Successfully", Toast.LENGTH_SHORT).show();
+        if (intent.equals("no")) {
+            String documentId = newNotificationRef.getId();
+            data.put("documentId",documentId);
 
-                        binding.desceEt.setText("");
-                        binding.tittleEt.setText("");
-                        adapter.uncheckAll();
-                        genderAdapter.uncheckAll();
-                        locationAdapter.uncheckAll();
+            Log.d("DocumentId", documentId);
+            newNotificationRef.set(data)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("SetData", "Notification added successfully");
+                            Toast.makeText(requireContext(), "Notification Created Successfully", Toast.LENGTH_SHORT).show();
+                            // ...
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("SetData", "Error adding notification", e);
-                        Toast.makeText(requireContext(), "Notification Failed to create", Toast.LENGTH_SHORT).show();
+                            binding.desceEt.setText("");
+                            binding.tittleEt.setText("");
+                            adapter.uncheckAll();
+                            genderAdapter.uncheckAll();
+                            locationAdapter.uncheckAll();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("SetData", "Error adding notification", e);
+                            Toast.makeText(requireContext(), "Notification Failed to create", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            Log.d("DocumentId", documentId);
+            FirebaseFirestore.getInstance().collection("notifications").document(documentId)
+                    .update(data)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d("SetData", "Notification updated successfully");
+                            Toast.makeText(requireContext(), "Notification updated Successfully", Toast.LENGTH_SHORT).show();
+                            // ...
 
-                    }
-                });
+                            binding.desceEt.setText("");
+                            binding.tittleEt.setText("");
+                            adapter.uncheckAll();
+                            genderAdapter.uncheckAll();
+                            locationAdapter.uncheckAll();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(requireContext(), "Failed to update data", Toast.LENGTH_SHORT).show();
+                            Log.d("WorkLocation",e.getLocalizedMessage());
+                        }
+                    });
+        }
+
+
+//        if (intent.equals("no")){
+//            newNotificationRef.set(data)
+//                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                        @Override
+//                        public void onSuccess(Void aVoid) {
+//                            Log.d("SetData", "Notification added successfully");
+//                            Toast.makeText(requireContext(), "Notification Created Successfully", Toast.LENGTH_SHORT).show();
+//
+//                            binding.desceEt.setText("");
+//                            binding.tittleEt.setText("");
+//                            adapter.uncheckAll();
+//                            genderAdapter.uncheckAll();
+//                            locationAdapter.uncheckAll();
+//
+//                        }
+//                    })
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            Log.e("SetData", "Error adding notification", e);
+//                            Toast.makeText(requireContext(), "Notification Failed to create", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//        }
+//        else {
+//            FirebaseFirestore.getInstance().collection("notifications").document(documentId)
+//                    .set(data).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                        @Override
+//                        public void onSuccess(Void unused) {
+//                            Log.d("SetData", "Notification updated successfully");
+//                            Toast.makeText(requireContext(), "Notification updated Successfully", Toast.LENGTH_SHORT).show();
+//
+//                            binding.desceEt.setText("");
+//                            binding.tittleEt.setText("");
+//                            adapter.uncheckAll();
+//                            genderAdapter.uncheckAll();
+//                            locationAdapter.uncheckAll();
+//                        }
+//                    })
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            Toast.makeText(requireContext(), "Failed to update data", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//        }
+
+        
     }
 
 

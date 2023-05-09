@@ -47,7 +47,7 @@ public class AcceptedFragment extends Fragment {
                         .setQuery(collection, NotificationModel.class)
                         .build();
 
-        adapter = new AcceptedAdapter(options);
+        adapter = new AcceptedAdapter(options,AcceptedFragment.this);
         binding.approvedRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.approvedRv.setAdapter(adapter);
 

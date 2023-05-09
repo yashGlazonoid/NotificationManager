@@ -12,6 +12,8 @@ public class NotificationModel {
     private ArrayList<String> genders = new ArrayList<>();
     private ArrayList<String> locations = new ArrayList<>();
     private boolean isApproved;
+
+    private String rejectionReason;
     private Map<String, Boolean> query;
 
     private Map<String,Object> userDetails;
@@ -27,6 +29,14 @@ public class NotificationModel {
     private Map<String,Object> pendingNotification;
 
     String status;
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
 
     public String getStatus() {
         return status;
@@ -112,7 +122,7 @@ public class NotificationModel {
         this.userDetails = userDetails;
     }
 
-    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, Map<String, Boolean> query, Map<String, Object> userDetails, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
+    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, String rejectionReason, Map<String, Boolean> query, Map<String, Object> userDetails, Map<String, Object> pendingNotification, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
         this.id = id;
         this.documentId = documentId;
         this.title = title;
@@ -121,8 +131,10 @@ public class NotificationModel {
         this.genders = genders;
         this.locations = locations;
         this.isApproved = isApproved;
+        this.rejectionReason = rejectionReason;
         this.query = query;
         this.userDetails = userDetails;
+        this.pendingNotification = pendingNotification;
         this.status = status;
         this.dateStartFrom = dateStartFrom;
         this.dateTo = dateTo;
