@@ -18,6 +18,16 @@ public class NotificationModel {
 
     private Map<String,Object> userDetails;
 
+    private ArrayList<String> extraUsers;
+
+    public ArrayList<String> getExtraUsers() {
+        return extraUsers;
+    }
+
+    public void setExtraUsers(ArrayList<String> extraUsers) {
+        this.extraUsers = extraUsers;
+    }
+
     public Map<String, Object> getPendingNotification() {
         return pendingNotification;
     }
@@ -122,7 +132,7 @@ public class NotificationModel {
         this.userDetails = userDetails;
     }
 
-    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, String rejectionReason, Map<String, Boolean> query, Map<String, Object> userDetails, Map<String, Object> pendingNotification, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
+    public NotificationModel(String id, String documentId, String title, String description, ArrayList<String> departments, ArrayList<String> genders, ArrayList<String> locations, boolean isApproved, String rejectionReason, Map<String, Boolean> query, Map<String, Object> userDetails, ArrayList<String> extraUsers, Map<String, Object> pendingNotification, String status, String dateStartFrom, String dateTo, String age, String ageShouldBe) {
         this.id = id;
         this.documentId = documentId;
         this.title = title;
@@ -134,6 +144,7 @@ public class NotificationModel {
         this.rejectionReason = rejectionReason;
         this.query = query;
         this.userDetails = userDetails;
+        this.extraUsers = extraUsers;
         this.pendingNotification = pendingNotification;
         this.status = status;
         this.dateStartFrom = dateStartFrom;

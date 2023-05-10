@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_nav"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/mainFragment">
 
     <fragment
         android:id="@+id/homeFragment"
@@ -18,10 +18,21 @@
         <action
             android:id="@+id/action_acceptedFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_acceptedFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
     </fragment>
     <fragment
         android:id="@+id/rejectedFragment"
         android:name="com.example.notificationmanager.fragments.RejectedFragment"
         android:label="fragment_rejected"
         tools:layout="@layout/fragment_rejected" />
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.notificationmanager.adapter.MainFragment"
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_acceptedFragment"
+            app:destination="@id/acceptedFragment" />
+    </fragment>
 </navigation>

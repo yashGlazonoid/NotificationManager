@@ -43,7 +43,7 @@ public class AcceptedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                     bundle.putString("documentId", model.getDocumentId());
                     Log.d("DocumentId",model.getDocumentId());
                     NavHostFragment.findNavController(mFragment)
-                            .navigate(R.id.action_acceptedFragment_to_homeFragment, bundle);
+                            .navigate(R.id.action_acceptedFragment_to_mainFragment, bundle);
                 }
             });
         }

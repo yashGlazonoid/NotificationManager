@@ -27,6 +27,7 @@ import com.example.notificationmanager.model.NotificationModel;
 import com.example.notificationmanager.model.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -71,6 +72,20 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
         mainString.setLength(0);
         mainString.append("This notice is for ");
 
+        if (Boolean.TRUE.equals(model.getQuery().get("extraUser"))){
+            List<String> users = model.getExtraUsers();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < users.size(); i++) {
+                sb.append(users.get(i));
+                if (users.size() == 2 && i == 0) {
+                    sb.append(" and ");
+                } else if (i != users.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            mainString.append(sb.toString());
+        }
+
         if (Boolean.TRUE.equals(model.getQuery().get("Gender"))) {
             holder.genderHelper.setVisibility(View.VISIBLE);
             holder.gender.setVisibility(View.VISIBLE);
@@ -88,7 +103,9 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
             mainString.append(sb.toString());
             mainString.append(" employees ");
         } else {
-            mainString.append("all employees ");
+            if (Boolean.FALSE.equals(model.getQuery().get("extraUser"))){
+                mainString.append("all employees ");
+            }
         }
 
         if (Boolean.TRUE.equals(model.getQuery().get("Department"))) {
@@ -197,10 +214,66 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                 ArrayList<String> workLocations = model.getLocations();
                 ArrayList<String> departmentTypes = model.getDepartments();
                 ArrayList<String> genders = model.getGenders();
+                ArrayList<String> extraUsers = model.getExtraUsers();
 
 
 
                 ArrayList<Task<QuerySnapshot>> tasks = new ArrayList<>();
+
+                if (extraUsers!=null && !extraUsers.isEmpty()){
+
+                    for (String documentName : extraUsers) {
+                        DocumentReference docRef = usersCollection.document(documentName);
+                        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot snapshot = task.getResult();
+                                    if (snapshot.exists()) {
+                                        Map<String, Object> data = snapshot.getData();
+                                        System.out.println("Document data: " + data);
+                                        assert data != null;
+                                        array.put(data.get("FCMToken"));
+                                        String token = (String) data.get("FCMToken");
+                                        Log.d("token",token);
+                                        FCMSend.pushNotification(v.getContext(),token,model.getTitle(),model.getDescription(),"notificationUpdater");
+                                    } else {
+                                        System.out.println("No such document!");
+                                    }
+                                } else {
+                                    System.out.println("Error getting document: " + task.getException());
+                                }
+                            }
+                        });
+                    }
+
+                    System.out.println(array);
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    if (mAuth.getCurrentUser() != null) {
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        DocumentReference docRef = db.collection("notifications").document(model.getDocumentId());
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("status", "close");
+                        docRef.update(updates)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("rejected", "Document updated successfully!");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e("rejected", "Error updating document", e);
+                                    }
+                                });
+                    } else {
+                        v.getContext().startActivity(new Intent(v.getContext(), LoginActivity.class));
+                    }
+
+
+
+                }
 
                 if (workLocations != null && !workLocations.isEmpty()) {
                     Log.d("WorkLocations",String.valueOf(workLocations));

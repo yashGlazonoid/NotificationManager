@@ -53,18 +53,19 @@ public class HomeFragment extends Fragment {
     private static ArrayList<String> finalDepartmentList = new ArrayList<>();
     private static ArrayList<String> finalGenderList = new ArrayList<>();
     private ArrayList<String> items;
-    private ChoiceAdapter adapter,locationAdapter;
+    private ChoiceAdapter adapter, locationAdapter;
     private ChoiceAdapter genderAdapter;
 
     private String documentId;
-    private Map<String,Boolean> query = new HashMap<>();
+    private Map<String, Boolean> query = new HashMap<>();
     private int checkDatePicker = 0;
 
     private String ageEt;
-    private int checkForSpinner =2 ;
+    private int checkForSpinner = 2;
     private String ageShouldBe;
 
-    private String dateFrom , dateTo;
+    private String dateFrom, dateTo;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -77,37 +78,35 @@ public class HomeFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             documentId = bundle.getString("documentId");
-            Log.d("documentId",documentId);
-            Log.d("DocumentId",documentId);
+            Log.d("documentId", documentId);
+            Log.d("DocumentId", documentId);
             getDataFromDocument(documentId);
-        }
-        else {
-            getDataFromFirebase();
-            getData();
+        } else {
+            getDataFromFirebase("no");
+            getData("no");
             binding.addBt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!finalLocationList.isEmpty()){
-                        query.put("Location",true);
+                    if (!finalLocationList.isEmpty()) {
+                        query.put("Location", true);
+                    } else {
+                        query.put("Location", false);
                     }
-                    else{
-                        query.put("Location",false);
+                    if (!finalGenderList.isEmpty()) {
+                        query.put("Gender", true);
+                    } else {
+                        query.put("Gender", false);
                     }
-                    if (!finalGenderList.isEmpty()){
-                        query.put("Gender",true);
-                    }
-                    else{
-                        query.put("Gender",false);
-                    }
-                    if (!finalDepartmentList.isEmpty()){
-                        query.put("Department",true);
-                    }
-                    else{
-                        query.put("Department",false);
+                    if (!finalDepartmentList.isEmpty()) {
+                        query.put("Department", true);
+                    } else {
+                        query.put("Department", false);
                     }
 
-                    if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
-                        setDataForAcceptance(query,checkForSpinner,"no");
+                    if (!binding.tittleEt.getText().toString().trim().isEmpty() && !binding.desceEt.getText().toString().trim().isEmpty()) {
+                        setDataForAcceptance(query, checkForSpinner, "no");
+                    } else {
+                        Toast.makeText(requireContext(), "Title and desc empty", Toast.LENGTH_SHORT).show();
                     }
 //                    if (!finalLocationList.isEmpty()&&!finalGenderList.isEmpty()&&!finalDepartmentList.isEmpty()
 //                            && !binding.tittleEt.getText().toString().trim().isEmpty()
@@ -134,7 +133,7 @@ public class HomeFragment extends Fragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 RadioButton radioButton = requireView().findViewById(checkedId);
                 ageShouldBe = radioButton.getText().toString().trim();
-                Log.d("ageShouldBe",ageShouldBe);
+                Log.d("ageShouldBe", ageShouldBe);
             }
         });
 
@@ -156,16 +155,13 @@ public class HomeFragment extends Fragment {
         binding.joinDateToBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkDatePicker==1){
+                if (checkDatePicker == 1) {
                     setDate("to");
-                }
-                else {
+                } else {
                     Toast.makeText(requireContext(), "Choose start date first", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-
 
 
         genderList.clear();
@@ -186,7 +182,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if (position==1){
+                if (position == 1) {
 //                    Toast.makeText(requireContext(), "First", Toast.LENGTH_SHORT).show();
                     binding.ageCardView.setVisibility(View.GONE);
                     binding.dateCardView.setVisibility(View.VISIBLE);
@@ -194,7 +190,7 @@ public class HomeFragment extends Fragment {
                     binding.ageEt.setText("");
                     binding.ageGreaterThan.setChecked(false);
                     binding.ageLessThan.setChecked(false);
-                }else if (position==0){
+                } else if (position == 0) {
 //                    Toast.makeText(requireContext(), "Zero", Toast.LENGTH_SHORT).show();
                     binding.ageCardView.setVisibility(View.VISIBLE);
                     binding.dateCardView.setVisibility(View.GONE);
@@ -236,10 +232,10 @@ public class HomeFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void getUserData(){
+    private void getUserData() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String currentUser = Objects.requireNonNull(auth.getCurrentUser()).getUid();
-        Log.d("currentUser",currentUser);
+        Log.d("currentUser", currentUser);
     }
 
     private void setDate(String dateType) {
@@ -251,7 +247,6 @@ public class HomeFragment extends Fragment {
                 selectedDate.set(year, monthOfYear, dayOfMonth);
 
 
-
                 if (selectedDate.after(calendar)) { // Check if selected date is after current date
                     Toast.makeText(requireContext(), "Selected date cannot be greater than current date", Toast.LENGTH_SHORT).show();
                     return;
@@ -260,13 +255,12 @@ public class HomeFragment extends Fragment {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 String selectedDateString = sdf.format(selectedDate.getTime());
 
-                if (dateType.equals("join")){
+                if (dateType.equals("join")) {
                     binding.joinDateFromBt.setText(selectedDateString);
                     long dateInMillis = selectedDate.getTimeInMillis();
                     dateFrom = String.valueOf(dateInMillis);
-                    checkDatePicker =1;
-                }
-                else{
+                    checkDatePicker = 1;
+                } else {
                     String fromDate = binding.joinDateFromBt.getText().toString();
                     try {
                         Date from = sdf.parse(fromDate);
@@ -289,7 +283,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
     private void getDataFromDocument(String documentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
@@ -309,15 +302,16 @@ public class HomeFragment extends Fragment {
                     String title = documentSnapshot.getString("title");
                     String description = documentSnapshot.getString("description");
 //                    boolean isApproved = documentSnapshot.getBoolean("isApproved");
-                    ArrayList<String> departments = (ArrayList<String>) documentSnapshot.get("departments");
-                    ArrayList<String> genders = (ArrayList<String>) documentSnapshot.get("genders");
-                    ArrayList<String> locations = (ArrayList<String>) documentSnapshot.get("locations");
-                    Log.d("WorkLocations",String.valueOf(departments));
-                    Log.d("WorkLocations",String.valueOf(genders));
-                    Log.d("WorkLocations",String.valueOf(locations));
+                   ArrayList<String> intentDepartment = (ArrayList<String>) documentSnapshot.get("departments");
+                    ArrayList<String> intentGender = (ArrayList<String>) documentSnapshot.get("genders");
+                    ArrayList<String> intentLocation = (ArrayList<String>) documentSnapshot.get("locations");
+//                    Log.d("WorkLocations", String.valueOf(intentDepartment));
+//                    Log.d("WorkLocations", String.valueOf(intentLocation));
+//                    Log.d("WorkLocations", String.valueOf(intentGender));
                     Log.d("GetNotification", "Notification Title: " + title);
                     binding.tittleEt.setText(title);
                     binding.desceEt.setText(description);
+
 
 //                    adapter = new ChoiceAdapter(departments,finalDepartmentList,"Department");
 //                    genderAdapter = new ChoiceAdapter(genders,finalGenderList,"Gender");
@@ -332,33 +326,32 @@ public class HomeFragment extends Fragment {
 //                    binding.departmentRv.setAdapter(adapter);
 //                    binding.departmentRv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                    getData();
-                    getDataFromFirebase();
+                    getData("yes");
+                    getDataFromFirebase("yes");
 
                     binding.addBt.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (!finalLocationList.isEmpty()){
-                                query.put("Location",true);
+                            if (!finalLocationList.isEmpty()) {
+                                query.put("Location", true);
+                            } else {
+                                query.put("Location", false);
                             }
-                            else{
-                                query.put("Location",false);
+                            if (!finalGenderList.isEmpty()) {
+                                query.put("Gender", true);
+                            } else {
+                                query.put("Gender", false);
                             }
-                            if (!finalGenderList.isEmpty()){
-                                query.put("Gender",true);
-                            }
-                            else{
-                                query.put("Gender",false);
-                            }
-                            if (!finalDepartmentList.isEmpty()){
-                                query.put("Department",true);
-                            }
-                            else{
-                                query.put("Department",false);
+                            if (!finalDepartmentList.isEmpty()) {
+                                query.put("Department", true);
+                            } else {
+                                query.put("Department", false);
                             }
 
-                            if (!binding.tittleEt.getText().toString().trim().isEmpty()&&!binding.desceEt.getText().toString().trim().isEmpty()){
-                                setDataForAcceptance(query,checkForSpinner,"yes");
+                            if (!binding.tittleEt.getText().toString().trim().isEmpty() && !binding.desceEt.getText().toString().trim().isEmpty()) {
+                                setDataForAcceptance(query, checkForSpinner, "yes");
+                            } else {
+                                Toast.makeText(requireContext(), "Title and desc empty", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -378,19 +371,22 @@ public class HomeFragment extends Fragment {
         });
 
     }
-    void getDataFromFirebase(){
+
+    void getDataFromFirebase(String intent) {
         FirebaseFirestore.getInstance().collection("ListOfList")
                 .document("CompanyRealEstate").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
-                            if (document.exists()){
+                            if (document.exists()) {
                                 locationList = (ArrayList<String>) document.get("Locations");
-                                Log.d("Location",locationList.toString());
-                                locationAdapter = new ChoiceAdapter(locationList,finalLocationList,"Location");
+                                Log.d("Location", locationList.toString());
+
+                                locationAdapter = new ChoiceAdapter(locationList, finalLocationList, intent);
+
                                 binding.locationRv.setAdapter(locationAdapter);
-                                if (isAdded()){
+                                if (isAdded()) {
                                     binding.locationRv.setLayoutManager(new LinearLayoutManager(requireContext()));
                                 }
                             }
@@ -398,37 +394,49 @@ public class HomeFragment extends Fragment {
                     }
                 });
     }
-    void getData(){
+
+    void getData(String intent) {
         FirebaseFirestore.getInstance().collection("ListOfList").document("DepartmentType").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                     DocumentSnapshot document = task.getResult();
-                         if (document.exists()){
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
 
-                             binding.maivCardView.setVisibility(View.VISIBLE);
-                             binding.progressBar.setVisibility(View.GONE);
+                        binding.maivCardView.setVisibility(View.VISIBLE);
+                        binding.progressBar.setVisibility(View.GONE);
 
-                             departmentList = (ArrayList<String>) document.get("Types");
-                             Log.d("departmentList",departmentList.toString());
+                        departmentList = (ArrayList<String>) document.get("Types");
+                        Log.d("departmentList", departmentList.toString());
 
 
-                             Log.d("Gender",genderList.toString());
+                        Log.d("Gender", genderList.toString());
 
-                             genderAdapter = new ChoiceAdapter(genderList,finalGenderList,"Gender");
-                             binding.genderRv.setAdapter(genderAdapter);
-                             binding.genderRv.setLayoutManager(new LinearLayoutManager(requireContext()));
-                             adapter = new ChoiceAdapter(departmentList,finalDepartmentList,"Department");
-                             binding.departmentRv.setAdapter(adapter);
-                             binding.departmentRv.setLayoutManager(new LinearLayoutManager(getContext()));
+                        if (intent.equals("yes")){
+                            genderAdapter = new ChoiceAdapter(genderList, finalGenderList, intent);
+                             adapter = new ChoiceAdapter(departmentList, finalDepartmentList, intent);
+                            binding.genderRv.setAdapter(genderAdapter);
+                            binding.genderRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+                            binding.departmentRv.setAdapter(adapter);
+                            binding.departmentRv.setLayoutManager(new LinearLayoutManager(getContext()));
+                        }
+                        else{
+                            genderAdapter = new ChoiceAdapter(genderList, finalGenderList, intent);
+                            adapter = new ChoiceAdapter(departmentList, finalDepartmentList, intent);
+                        }
 
-                         }
-                         else{
-                             Toast.makeText(requireContext(), "No such element", Toast.LENGTH_SHORT).show();
-                         }
+
+
+                        binding.genderRv.setAdapter(genderAdapter);
+                        binding.genderRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+                        binding.departmentRv.setAdapter(adapter);
+                        binding.departmentRv.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                    } else {
+                        Toast.makeText(requireContext(), "No such element", Toast.LENGTH_SHORT).show();
                     }
-                else{
-                    Log.d("Working",task.getException().toString());
+                } else {
+                    Log.d("Working", task.getException().toString());
                 }
             }
         });
@@ -448,7 +456,7 @@ public class HomeFragment extends Fragment {
         return Long.parseLong(formattedDate);
     }
 
-    void setDataForAcceptance(Map<String, Boolean> query, int checkForSpinner, String intent){
+    void setDataForAcceptance(Map<String, Boolean> query, int checkForSpinner, String intent) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference notificationsRef = db.collection("notifications");
         DocumentReference newNotificationRef = notificationsRef.document();
@@ -458,60 +466,58 @@ public class HomeFragment extends Fragment {
         String description = binding.desceEt.getText().toString().trim();
 
         Map<String, Object> data = new HashMap<>();
-        if (!finalDepartmentList.isEmpty()){
+        if (!finalDepartmentList.isEmpty()) {
             data.put("departments", finalDepartmentList);
         }
-        if (!finalGenderList.isEmpty()){
+        if (!finalGenderList.isEmpty()) {
             data.put("genders", finalGenderList);
         }
-        if (!finalLocationList.isEmpty()){
+        if (!finalLocationList.isEmpty()) {
             data.put("locations", finalLocationList);
         }
-        if (checkForSpinner == 0){
-            if (!binding.ageEt.getText().toString().isEmpty()){
-                data.put("age",binding.ageEt.getText().toString().trim());
-                data.put("ageShouldBe",ageShouldBe);
-                query.put("age",true);
-                query.put("date",false);
-            }else{
-                query.put("age",false);
-                query.put("date",false);
+        if (checkForSpinner == 0) {
+            if (!binding.ageEt.getText().toString().isEmpty()) {
+                data.put("age", binding.ageEt.getText().toString().trim());
+                data.put("ageShouldBe", ageShouldBe);
+                query.put("age", true);
+                query.put("date", false);
+            } else {
+                query.put("age", false);
+                query.put("date", false);
+            }
+        } else {
+            if (checkDatePicker == 1) {
+                data.put("dateStartFrom", dateFrom);
+                data.put("dateTo", dateTo);
+                query.put("date", true);
+                query.put("age", false);
+            } else {
+                query.put("date", false);
+                query.put("age", false);
             }
         }
-        else{
-            if (checkDatePicker==1){
-                data.put("dateStartFrom",dateFrom);
-                data.put("dateTo",dateTo);
-                query.put("date",true);
-                query.put("age",false);
-            }
-            else{
-                query.put("date",false);
-                query.put("age",false);
-            }
-        }
-        Log.d("CheckForSpinner",String.valueOf(checkForSpinner));
+        Log.d("CheckForSpinner", String.valueOf(checkForSpinner));
         data.put("title", title);
         data.put("description", description);
 //        data.put("isApproved", "No");
-        data.put("query",query);
+        data.put("query", query);
         Map<String, Object> userDetails = new HashMap<>();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        userDetails.put("uid",auth.getCurrentUser().getUid().toString());
-        userDetails.put("userPhoto",auth.getCurrentUser().getPhotoUrl().toString());
+        userDetails.put("uid", auth.getCurrentUser().getUid().toString());
+        userDetails.put("userPhoto", auth.getCurrentUser().getPhotoUrl().toString());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date();
         String formattedDate = sdf.format(date);
-        userDetails.put("date",formattedDate);
-        userDetails.put("time",System.currentTimeMillis());
-        userDetails.put("userFcmToken","fcIcc07fTp6tplyM7LlCkF:APA91bF8MHi3rHRQL1iHj8mKyTi3VNpxonzCpya10Z255_lbh6Ry42BKqWCEkF6uKKwPxMeAjTX-gVwEUxU0EMpRRTI9UWq0aX8QuhiFBISHL8Yb3GnCNgEY0h0s4ee_xqq5pQhvVg-9");
-        userDetails.put("notificationCreatedBy",auth.getCurrentUser().getDisplayName());
-        data.put("userDetails",userDetails);
-        data.put("status","open");
+        userDetails.put("date", formattedDate);
+        userDetails.put("time", System.currentTimeMillis());
+        userDetails.put("userFcmToken", "fcIcc07fTp6tplyM7LlCkF:APA91bF8MHi3rHRQL1iHj8mKyTi3VNpxonzCpya10Z255_lbh6Ry42BKqWCEkF6uKKwPxMeAjTX-gVwEUxU0EMpRRTI9UWq0aX8QuhiFBISHL8Yb3GnCNgEY0h0s4ee_xqq5pQhvVg-9");
+        userDetails.put("notificationCreatedBy", auth.getCurrentUser().getDisplayName());
+        data.put("userDetails", userDetails);
+        data.put("status", "open");
 
         if (intent.equals("no")) {
             String documentId = newNotificationRef.getId();
-            data.put("documentId",documentId);
+            data.put("documentId", documentId);
 
             Log.d("DocumentId", documentId);
             newNotificationRef.set(data)
@@ -564,7 +570,7 @@ public class HomeFragment extends Fragment {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(requireContext(), "Failed to update data", Toast.LENGTH_SHORT).show();
-                            Log.d("WorkLocation",e.getLocalizedMessage());
+                            Log.d("WorkLocation", e.getLocalizedMessage());
                         }
                     });
         }
@@ -617,11 +623,11 @@ public class HomeFragment extends Fragment {
 //                    });
 //        }
 
-        
+
     }
 
 
-    void getUserFilter(){
+    void getUserFilter() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
 
@@ -636,12 +642,12 @@ public class HomeFragment extends Fragment {
                         User user = documentSnapshot.toObject(User.class);
                         for (int i = 0; i < finalDepartmentList.size() && i < user.getDepartmentTypes().size(); i++) {
                             if (finalDepartmentList.get(i).equals(user.getDepartmentTypes().get(i))) {
-                               salesUsers.add(user);
+                                salesUsers.add(user);
                             }
                         }
 //                        salesUsers.add(user);
                     }
-                    Log.d("SalesUser",String.valueOf(salesUsers));
+                    Log.d("SalesUser", String.valueOf(salesUsers));
                 })
                 .addOnFailureListener(e -> {
                     // Handle any errors here

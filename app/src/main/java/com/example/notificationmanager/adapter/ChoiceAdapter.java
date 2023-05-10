@@ -1,5 +1,6 @@
 package com.example.notificationmanager.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,18 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
         String current = mList.get(position);
         holder.choiceTitle.setText(current);
 
+        if (mChoice.equals("yes")){
+            if (holder.choiceTitle.getText().equals(current)){
+                holder.addBt.setChecked(true);
+                Log.d("notFromIntent","from intent");
+                Log.d("notFromIntent",holder.choiceTitle.getText().toString());
+
+            }
+        }
+        else {
+            Log.d("notFromIntent","Not from intent");
+        }
+
         if (checkBox == 1){
             holder.addBt.setChecked(false);
         }
@@ -76,7 +89,7 @@ public class ChoiceAdapter extends RecyclerView.Adapter<ChoiceAdapter.ChoiceView
         return mList.size();
     }
 
-    class ChoiceViewHolder extends RecyclerView.ViewHolder {
+    static class ChoiceViewHolder extends RecyclerView.ViewHolder {
         TextView choiceTitle;
         CheckBox addBt;
         public ChoiceViewHolder(@NonNull View itemView) {
