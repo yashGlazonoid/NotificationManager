@@ -1,7 +1,10 @@
 package com.example.notificationmanager.adapter;
 
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -16,12 +20,15 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.example.notificationmanager.R;
 import com.example.notificationmanager.databinding.FragmentMainBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -72,6 +79,9 @@ public class MainFragment extends Fragment {
     private FirebaseFirestore mFirebaseFirestore;
     private ArrayAdapter<String> userListAdapter;
 
+    private CountDownTimer countDownTimer;
+    private TextView timerTextView;
+
     public MainFragment() {
         // Required empty public constructor
     }
@@ -98,6 +108,12 @@ public class MainFragment extends Fragment {
             documentId = bundle.getString("documentId");
             getDataFromDocument(documentId);
         } else {
+            binding.helperTT.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getDialogBox("Hey there!","Now you can create custom notifications for your employess and do what ever you want with notification",R.raw.success_popup_lottie);
+                }
+            });
             binding.addBt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -199,6 +215,86 @@ public class MainFragment extends Fragment {
 
         return binding.getRoot();
     }
+
+    private void getDialogBox(String title, String desc, int rawResPath) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(requireContext(),R.style.CustomDialogTheme);
+        final View customLayout = getLayoutInflater().inflate(R.layout.image_popup_dialog_layout, null);
+        customLayout.setBackgroundColor(Color.TRANSPARENT); // set background color to transparent
+        alertDialog.setView(customLayout);
+        Button okayButton = customLayout.findViewById(R.id.successDialogButton);
+        TextView dialogTitle = customLayout.findViewById(R.id.successDialogTitle);
+        TextView dialogDesc = customLayout.findViewById(R.id.successDialogDesc);
+        LottieAnimationView lottieAnimationView = customLayout.findViewById(R.id.lottieSuccess);
+
+        lottieAnimationView.setAnimation(rawResPath);
+
+        dialogTitle.setText(title);
+        dialogDesc.setText(desc);
+
+        AlertDialog alert = alertDialog.create();
+        okayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alert.dismiss();
+                getTimerDialog("Hi there!","Please complete your task on time on few time left for task",10000);
+            }
+        });
+        alert.show();
+    }
+
+
+
+    private void getTimerDialog(String title, String desc,long timeLeft) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogStyle);
+        final View customLayout = getLayoutInflater().inflate(R.layout.time_dialog_layout, null);
+        customLayout.setBackgroundColor(Color.TRANSPARENT); // set background color to transparent
+        alertDialog.setView(customLayout);
+        Button okayButton = customLayout.findViewById(R.id.timeDialogButton);
+        TextView dialogTitle = customLayout.findViewById(R.id.timeDialogTitle);
+        TextView dialogDesc = customLayout.findViewById(R.id.timeDialogDesc);
+        timerTextView = customLayout.findViewById(R.id.timeDialogTimer);
+
+        dialogTitle.setText(title);
+        dialogDesc.setText(desc);
+
+        AlertDialog alert = alertDialog.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                // Start the countdown timer when the dialog is shown
+                countDownTimer.start();
+            }
+        });
+
+        okayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Cancel the countdown timer and dismiss the dialog box when the button is clicked
+                countDownTimer.cancel();
+                alert.dismiss();
+                getDialogBox("hi complete your task","new task has been assigned please complete it before time",R.raw.task_lottie);
+            }
+        });
+
+        countDownTimer = new CountDownTimer(timeLeft, 1000) {
+            public void onTick(long millisUntilFinished) {
+                // Update the timer text view with the remaining time
+                timerTextView.setText(millisUntilFinished / 1000 + " seconds");
+            }
+
+            public void onFinish() {
+                // Dismiss the dialog box when the countdown finishes
+                alert.dismiss();
+            }
+        };
+
+        alert.show();
+
+
+
+    }
+
+
 
     private void getDataFromDocument(String documentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

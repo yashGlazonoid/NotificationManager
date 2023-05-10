@@ -236,6 +236,7 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                                         array.put(data.get("FCMToken"));
                                         String token = (String) data.get("FCMToken");
                                         Log.d("token",token);
+                                        array.put(token);
                                         FCMSend.pushNotification(v.getContext(),token,model.getTitle(),model.getDescription(),"notificationUpdater");
                                     } else {
                                         System.out.println("No such document!");
@@ -309,7 +310,7 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                 Tasks.whenAllSuccess(tasks).addOnSuccessListener(new OnSuccessListener<List<Object>>() {
                     @Override
                     public void onSuccess(List<Object> objects) {
-                        JSONArray array = new JSONArray();
+//                        JSONArray array = new JSONArray();
                         ArrayList<String> tokenList = new ArrayList<>();
                         for (Object object : objects) {
                             QuerySnapshot querySnapshot = (QuerySnapshot) object;
