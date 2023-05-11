@@ -9,6 +9,26 @@ public class User {
     String Gender = "";
     String WorkLocation = "";
 
+    private ArrayList<String> notificationDialogs;
+
+    public ArrayList<String> getNotificationDialogs() {
+        return notificationDialogs;
+    }
+
+    public void setNotificationDialogs(ArrayList<String> notificationDialogs) {
+        this.notificationDialogs = notificationDialogs;
+    }
+
+    String ID;
+
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
+    }
+
     public User() {
     }
 

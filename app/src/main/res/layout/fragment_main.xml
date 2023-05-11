@@ -363,6 +363,55 @@
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/notificationCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/ageCardView"
+                android:layout_marginHorizontal="20dp"
+                android:visibility="visible"
+                >
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/notificationHelper"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Type of notification"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_margin="20dp"
+                        />
+
+                    <RadioGroup
+                        android:id="@+id/notificationRadioGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/notificationHelper"
+                        android:layout_marginHorizontal="20dp"
+                        android:orientation="horizontal"
+                        >
+                        <RadioButton
+                            android:id="@+id/notification"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Notification"
+                            />
+                        <RadioButton
+                            android:id="@+id/alertDialog"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Alert Dialog"
+                            android:layout_marginStart="20dp"
+                            />
+
+                    </RadioGroup>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
 
 
 

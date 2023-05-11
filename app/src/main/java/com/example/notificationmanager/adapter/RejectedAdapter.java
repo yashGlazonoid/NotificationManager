@@ -55,6 +55,7 @@ import java.util.Map;
 public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel, RejectedAdapter.RejectedViewHolder> {
 
     private StringBuilder mainString= new StringBuilder();
+    private Boolean notification = true;
     public RejectedAdapter(@NonNull FirestoreRecyclerOptions<NotificationModel> options, Context context) {
         super(options);
     }
@@ -317,25 +318,68 @@ public class RejectedAdapter extends FirestoreRecyclerAdapter<NotificationModel,
                             for (QueryDocumentSnapshot document : querySnapshot) {
                                 User user = document.toObject(User.class);
 
-                                if (!tokenList.contains(user.getFCMToken())) {
-                                    tokenList.add(user.getFCMToken());
-                                } else {
-                                    Log.d("fcm", "Token already in list: " + user.getFCMToken());
+                                if (!model.getNotification()){
+                                    notification = model.getNotification();
+                                    Map<String,Object> data = new HashMap<>();
+//                                    data.put("newNotification",true);
+//                                    data.put("notificationId",model.getDocumentId());
+
+                                    ArrayList<String> notificationDialogs = new ArrayList<>();
+                                    if (user.getNotificationDialogs()!=null){
+                                        notificationDialogs = user.getNotificationDialogs();
+                                        if (!notificationDialogs.contains(model.getDocumentId())){
+                                            notificationDialogs.add(model.getDocumentId());
+                                        }
+                                    }
+                                    else{
+                                        notificationDialogs.add(model.getDocumentId());
+                                    }
+
+                                    data.put("notificationDialogs",notificationDialogs);
+
+
+                                    FirebaseFirestore.getInstance().collection("Users")
+                                            .document(user.getID()).update(data).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    Log.d("UserUpdated","User Updated success");
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.d("UserUpdated","User Updated failed");
+
+                                                }
+                                            });
                                 }
+
+                                else{
+                                    if (!tokenList.contains(user.getFCMToken())) {
+                                        tokenList.add(user.getFCMToken());
+                                    } else {
+                                        Log.d("fcm", "Token already in list: " + user.getFCMToken());
+                                    }
+                                }
+
 
 //                                array.put(user.getFCMToken());
                             }
                         }
-                        for (String token : tokenList) {
-                            array.put(token);
+
+                        if (notification){
+                            for (String token : tokenList) {
+                                array.put(token);
+                            }
+                            FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "notificationUpdater");
                         }
+
+
 
                         System.out.println(array);
 
 //                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
                         Log.d("fcm", String.valueOf(array));
                         System.out.println(array);
-                        FCMSend.pushNotificationMultiple(v.getContext(), array, model.getTitle(), model.getDescription(), "notificationUpdater");
                         FirebaseAuth mAuth = FirebaseAuth.getInstance();
                         if (mAuth.getCurrentUser() != null) {
                             FirebaseFirestore db = FirebaseFirestore.getInstance();

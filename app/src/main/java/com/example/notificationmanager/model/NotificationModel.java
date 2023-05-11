@@ -20,6 +20,16 @@ public class NotificationModel {
 
     private ArrayList<String> extraUsers;
 
+    private Boolean notification;
+
+    public Boolean getNotification() {
+        return notification;
+    }
+
+    public void setNotification(Boolean notification) {
+        this.notification = notification;
+    }
+
     public ArrayList<String> getExtraUsers() {
         return extraUsers;
     }

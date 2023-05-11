@@ -1,4 +1,4 @@
-package com.example.notificationmanager.adapter;
+package com.example.notificationmanager.fragments;
 
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
@@ -52,6 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import io.paperdb.Paper;
 
 
 public class MainFragment extends Fragment {
@@ -87,6 +90,12 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Paper.init(requireContext());
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentMainBinding.inflate(inflater,container,false);
@@ -99,9 +108,13 @@ public class MainFragment extends Fragment {
         intentGenderList = new ArrayList<>();
         intentLocationList = new ArrayList<>();
 
+        checkForNotification();
+
         getTypesOfDepartments();
         getTypesOfLocation();
         getTypesOfGender();
+
+
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -111,7 +124,7 @@ public class MainFragment extends Fragment {
             binding.helperTT.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getDialogBox("Hey there!","Now you can create custom notifications for your employess and do what ever you want with notification",R.raw.success_popup_lottie);
+//                    getDialogBox("Hey there!","Now you can create custom notifications for your employess and do what ever you want with notification",R.raw.success_popup_lottie, notificationId);
                 }
             });
             binding.addBt.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +153,12 @@ public class MainFragment extends Fragment {
                     }
 
                     if (!binding.tittleEt.getText().toString().trim().isEmpty() && !binding.desceEt.getText().toString().trim().isEmpty()) {
-                        setDataForAcceptance(query, checkForSpinner, "no");
+                        if (binding.alertDialog.isChecked() || binding.notification.isChecked()){
+                            setDataForAcceptance(query, checkForSpinner, "no");
+                        }
+                        else{
+                            Toast.makeText(requireContext(), "Must select a type", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(requireContext(), "Title and desc empty", Toast.LENGTH_SHORT).show();
                     }
@@ -204,11 +222,24 @@ public class MainFragment extends Fragment {
                 }
             }
 
+
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
+
+//        binding.departmentHelper.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                binding.ageGreaterThan.setChecked(false);
+//                binding.ageLessThan.setChecked(false);
+//                binding.ageEt.setText("");
+//
+//
+//            }
+//        });
 
         getUserForSearch();
 
@@ -216,7 +247,82 @@ public class MainFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void getDialogBox(String title, String desc, int rawResPath) {
+    private void checkForNotification() {
+        FirebaseFirestore.getInstance().collection("Users").document("Yash")
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot snapshot = task.getResult();
+                            if (snapshot.exists()) {
+                                Map<String, Object> data = snapshot.getData();
+                                Boolean newNotification = (Boolean) data.get("newNotification");
+                                String notificationId = (String) data.get("notificationId");
+                                ArrayList<String> dialogNotifications= new ArrayList<>();
+                                if (data.get("notificationDialogs")!=null){
+                                    dialogNotifications =(ArrayList<String>) data.get("notificationDialogs");
+                                }
+                                for (String noti : dialogNotifications){
+                                    getNotificationFromDatabase(noti);
+                                }
+                                Log.d("Errror",notificationId + " " + newNotification);
+//                                if (Boolean.TRUE.equals(newNotification)){
+//                                    getNotificationFromDatabase(notificationId);
+//                                }
+                            } else {
+                                System.out.println("No such document!");
+                            }
+                        } else {
+                            System.out.println("Error getting document: " + task.getException());
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        System.out.println("Error getting document: " + e.getMessage());
+                    }
+                });
+    }
+
+    private void getNotificationFromDatabase(String notificationId) {
+        FirebaseFirestore.getInstance().collection("notifications")
+                .document(notificationId)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot snapshot = task.getResult();
+                            if (snapshot.exists()) {
+                                Map<String, Object> data = snapshot.getData();
+                                String title =(String) data.get("title");
+                                String description = (String) data.get("description");
+                                int dialogCount = Paper.book().read("dialogCount_" + notificationId, 0);
+                                Log.d("dialogCount","dialogCount_"+notificationId);
+                                if (dialogCount<20){
+                                    getDialogBox(title,description,R.raw.success_popup_lottie,notificationId);
+                                }
+                                else{
+                                    Paper.book().delete("dialogCount"+notificationId);
+                                    Toast.makeText(requireContext(), "Deleted the dialogCount_"+notificationId, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                System.out.println("No such document!");
+                            }
+                        } else {
+                            System.out.println("Error getting document: " + task.getException());
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("Errror","failed to get notification " + e.getMessage());
+                    }
+                });
+    }
+
+    private void getDialogBox(String title, String desc, int rawResPath, String notificationId) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(requireContext(),R.style.CustomDialogTheme);
         final View customLayout = getLayoutInflater().inflate(R.layout.image_popup_dialog_layout, null);
         customLayout.setBackgroundColor(Color.TRANSPARENT); // set background color to transparent
@@ -235,13 +341,18 @@ public class MainFragment extends Fragment {
         okayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int dialogCount = Paper.book().read("dialogCount_" + notificationId, 0);
+                Log.d("dialogCount",String.valueOf(dialogCount));
+                Paper.book().write("dialogCount_" + notificationId, dialogCount + 1);
+                Log.d("dialogCount",String.valueOf(dialogCount+1));
+
+
                 alert.dismiss();
-                getTimerDialog("Hi there!","Please complete your task on time on few time left for task",10000);
+//                getTimerDialog("Hi there!","Please complete your task on time on few time left for task",10000);
             }
         });
         alert.show();
     }
-
 
 
     private void getTimerDialog(String title, String desc,long timeLeft) {
@@ -272,7 +383,7 @@ public class MainFragment extends Fragment {
                 // Cancel the countdown timer and dismiss the dialog box when the button is clicked
                 countDownTimer.cancel();
                 alert.dismiss();
-                getDialogBox("hi complete your task","new task has been assigned please complete it before time",R.raw.task_lottie);
+//                getDialogBox("hi complete your task","new task has been assigned please complete it before time",R.raw.task_lottie, notificationId);
             }
         });
 
@@ -534,7 +645,6 @@ public class MainFragment extends Fragment {
         if (!finalLocationList.isEmpty()) {
             data.put("locations", finalLocationList);
             Log.d("finalList",finalLocationList.toString());
-
         }
         if (checkForSpinner == 0) {
             if (!binding.ageEt.getText().toString().isEmpty()) {
@@ -557,6 +667,14 @@ public class MainFragment extends Fragment {
                 query.put("age", false);
             }
         }
+        
+        if (binding.notification.isChecked()){
+            data.put("notification",true);
+        }
+        else{
+            data.put("notification",false);
+        }
+
         data.put("title", title);
         data.put("description", description);
 //        data.put("isApproved", "No");
